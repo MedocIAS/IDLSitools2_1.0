@@ -1,0 +1,172 @@
+
+#####################################################################Sitools2
+RETALL 
+.compile sitools2Instance__define
+S1=obj_new('sitools2Instance')
+;;url ="medoc-sdo.ias.u-psud.fr"
+url="idoc-herschel.ias.u-psud.fr"
+S1->set,url
+list_projects=S1->list_project()
+;;print, (list_projects[1])
+
+#####################################################################Field
+RETALL 
+.compile field__define
+
+
+#####################################################################Project
+RETALL 
+.compile project__define
+url ="medoc-sdo.ias.u-psud.fr/webs_ias_sdo_data_project"
+
+P1=obj_new('project',url)
+result=P1->get_attributes()
+help , result
+toto=P1->dataset_list() 
+
+#####################################################################Dataset
+RETALL 
+.compile dataset__define
+;;url="medoc-sdo.ias.u-psud.fr/webs_IAS_SDO_dataset"
+url="idoc-herschel.ias.u-psud.fr/ds/pub/spirephotol2"
+ds1=obj_new('dataset',url)
+result=ds1->get_attributes()
+help , result
+
+
+#####################################################################Dataset & Query
+RETALL
+.compile dataset__define
+url="medoc-sdo.ias.u-psud.fr/webs_IAS_SDO_dataset"
+;;url="idoc-herschel.ias.u-psud.fr/ds/pub/spirephotol2"
+;;url="idoc-corotn2-public-v2.ias.u-psud.fr/ProjectEx"
+ds1=obj_new('dataset',url)
+;;PRINT, ds1->get_attributes()
+;;ds1->resources_list
+;;result=ds1->execute_plugin(plugin_name='plugin02', pkey_list=LIST(121865894,121866432,121866455), FILENAME='toto.tar')
+
+;;#Build Query
+fields_list=(ds1->get_attributes()).FIELDS_LIST
+param_query1=LIST(fields_list[4], ['2011-01-01T00:00','2011-01-01T00:05'], 'DATE_BETWEEN')
+param_query2=LIST([fields_list[5]],['335','193'],'IN')
+param_query3=LIST([fields_list[10]],['1+min'],'CADENCE')
+param_query4=LIST([fields_list[8]],['5.800849'],'LTE')
+Q1=obj_new('query',param_query1)
+Q2=obj_new('query',param_query2)
+Q3=obj_new('query',param_query3)
+Q4=obj_new('query',param_query4)
+
+;;#Check query
+;;help, Q4
+;;print, Q4
+;;print, Q4->get_name_list_str()
+
+
+;;#Build output
+;;Ask get, date__obs, wave, ias_location
+;;O1=LIST(fields_list[0],fields_list[4],fields_list[5],fields_list[7])
+
+;;#Build output n° 2
+;;Ask get, date__obs, wave, ias_location,exp_time
+;;O1=LIST(fields_list[0],fields_list[4],fields_list[5],fields_list[7],fields_list[8])
+
+;;#Build output n° 3
+;;Ask get, date__obs, wave, ias_location,exp_time,recnum
+O1=LIST(fields_list[0],fields_list[4],fields_list[5],fields_list[7],fields_list[8],fields_list[1])
+
+
+;;#Build sort 
+;;Sort wave ASC ,date__obs ASC,
+S1=LIST(LIST(fields_list[5],'ASC'),LIST(fields_list[4],'ASC'))
+
+;;#Perform a search
+results=ds1->search(LIST(Q1,Q2,Q3,Q4),O1,S1,limit_to_nb_res_max=10)
+
+;;#Print result
+;;FOREACH data, results DO PRINT, JSON_SERIALIZE(data)
+
+;;#Retrieve data
+get=ds1->get_list(data_list=results)
+
+;;#Perform metadata search
+recnum_list=LIST()
+
+FOREACH record, results DO recnum_list.Add, STRING(record['recnum'])
+PRINT, recnum_list
+
+url_aia_dataset= "medoc-sdo.ias.u-psud.fr/webs_aia_dataset"
+ds_aia=obj_new('dataset',url_aia_dataset)
+
+;;#Define and print aia_fields_list
+aia_fields_list=(ds_aia->get_attributes()).FIELDS_LIST
+FOREACH field, aia_fields_list, key DO PRINT ,STRING(key)+" "+field->get_name() 
+
+
+;;#Build query with recnum
+param_query5=LIST([aia_fields_list[0]],recnum_list,'IN')
+Q5=obj_new('query',param_query5)
+
+;;#Build output n° 4 recnum, sunun, quality, cdelt1, date__obs
+O1_aia=LIST(aia_fields_list[0],aia_fields_list[1],aia_fields_list[30], aia_fields_list[59], aia_fields_list[18])
+
+
+;;#Build sort 
+;;Sort 
+S1_aia=LIST(LIST(aia_fields_list[18],'ASC'))
+
+;;#Perform a search
+results_aia=ds_aia->media_search(LIST(Q5),O1_aia,S1_aia,limit_to_nb_res_max=10)
+
+;;#Print result
+FOREACH data, results_aia DO PRINT, JSON_SERIALIZE(data)
+
+#####################################################################sdoIasDataset
+RETALL
+.compile sdoiasdataset__define
+ds1=obj_new('sdoIasDataset')
+PRINT, ds1->get_attributes()
+file=ds1->getSelection(SUNUM_LIST=LIST(121865894,121866432,121866455) , FILENAME='toto.tar', TARGET_DIR='results', DOWNLOAD_TYPE='TAR' )
+
+
+#####################################################################sdoData & search function
+.compile sdodata__define  
+.compile sdoiasdataset__define
+sdo_list=media_search( DATES=LIST('2011-01-01T00:00','2011-01-01T00:05') , WAVES=LIST('304','193') , CADENCE=LIST('1+min'),  NB_RES_MAX=10)
+FOREACH sdo_data_item, sdo_list DO PRINT, sdo_data_item->get_attributes()
+FOREACH sdo_data_item, sdo_list DO file=sdo_data_item->get_file()
+
+#####################################################################ultimate version 
+sdo_list=media_search( DATES=LIST('2011-01-01T00:00','2011-01-01T00:05') , WAVES=LIST('304','193') , CADENCE=LIST('1+min'),  NB_RES_MAX=10)
+FOREACH sdo_item, sdo_list, iter DO BEGIN
+	PRINT, "Record n ° ",iter
+	PRINT, sdo_item->get_attributes()
+	meta_data_search=sdo_item->metadata_search(KEYWORDS=LIST('quality','cdelt1','cdelt2'))
+	PRINT, JSON_SERIALIZE(meta_data_search)
+ENFFOREACH
+
+
+;;toto=media_get(MEDIA_DATA_LIST=sdo_list)
+
+
+
+
+#####################################################################gaiadata
+RETALL
+.compile gaiadata__define  
+.compile gaiadataset__define
+
+ds1=obj_new('gaiadataset')
+gaia_fields_list=(ds1->get_attributes()).FIELDS_LIST
+FOREACH field, gaia_fields_list, key DO PRINT ,STRING(key)+" "+field->get_name()
+
+RETALL
+.compile gaiadata__define  
+.compile gaiadataset__define
+gaia_list=gaia_search( DATES=LIST('2011-01-01T00:00','2011-01-01T00:05') , NB_RES_MAX=10)
+FOREACH gaia_data_item, gaia_list DO PRINT, gaia_data_item->get_attributes()
+FOREACH gaia_data_item, gaia_list DO file= gaia_data_item->get_file()
+
+#####################################################################ultimate version 
+RETALL
+gaia_list=gaia_search( DATES=LIST('2011-01-01T00:00','2011-01-01T00:05') , NB_RES_MAX=10)
+;;toto=gaia_get(GAIA_LIST=gaia_list)
