@@ -55,7 +55,7 @@
 
 
 - Extract the content of IDLSitools2_1.0.tar.gz or IDLSitools2_1.0.zip into your favourite directory 
-
+     Example : 
      $ tar xzvf IDLSitools2_1.0.tar.gz /usr/local/Sitools2Client
 
 
@@ -83,25 +83,24 @@
     $ sdo_list=media_search( DATES=LIST('2011-01-01T00:00','2011-01-01T00:05') , WAVES=LIST('304','193') , CADENCE=LIST('1+min'),  NB_RES_MAX=10)
 
 
-- Simply download the result of your previous search() calling the media_get()function.
+- Simply download the result of your previous search() calling the media_get() function.
 
     $ media_execute=media_get(MEDIA_DATA_LIST=sdo_list)
 
 - Have additional metadata information about each previous answer using the metadata_search() method.
 
     $ FOREACH sdo_item, sdo_list DO BEGIN
-     meta_data_search=sdo_item-&gt;metadata_search(KEYWORDS=LIST('quality','cdelt1','cdelt2'))
-     PRINT, JSON_SERIALIZE(meta_data_search)
-      ENFFOREACH
+        meta_data_search=sdo_item-&gt;metadata_search(KEYWORDS=LIST('quality','cdelt1','cdelt2'))
+        PRINT, JSON_SERIALIZE(meta_data_search)
+      ENDFOREACH
 
 - Filter on a specific keyword before download data using the get_file() method.
 
-FOREACH sdo_item, sdo_list DO BEGIN
+$ FOREACH sdo_item, sdo_list DO BEGIN
     meta_data_search=sdo_item-&gt;metadata_search(KEYWORDS=LIST('quality','cdelt1','cdelt2'))
-    PRINT, JSON_SERIALIZE(meta_data_search)
     file=obj_new()
     IF meta_data_search['quality'] EQ 0 THEN  file=sdo_item-&gt;get_file(TARGET_DIR='/tmp')
-ENDFOREACH
+  ENDFOREACH
 </code></pre>
 
 <h3>
