@@ -1,3 +1,7 @@
 results/
 commandes_idl.txt
-
+.svn/
+clients/.svn
+core/.svn
+example/.svn
+clients/MEDIA/.svn
