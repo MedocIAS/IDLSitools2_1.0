@@ -4,7 +4,7 @@
   <head>
     <meta charset='utf-8' />
     <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-    <meta name="description" content="IDLSitools2_1.0 : IDLSitools2_1.0 is a generic IDL Sitools2V1.0 client. " />
+    <meta name="description" content="IDLSitools2_1.0 : Access SDO Data &amp; GAIA-DEM Data " />
 
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
 
@@ -19,7 +19,7 @@
           <a id="forkme_banner" href="https://github.com/PabloIAS/IDLSitools2_1.0">View on GitHub</a>
 
           <h1 id="project_title">IDLSitools2_1.0</h1>
-          <h2 id="project_tagline">IDLSitools2_1.0 is a generic IDL Sitools2V1.0 client. </h2>
+          <h2 id="project_tagline">Access SDO Data &amp; GAIA-DEM Data </h2>
 
             <section id="downloads">
               <a class="zip_download_link" href="https://github.com/PabloIAS/IDLSitools2_1.0/zipball/master">Download this project as a .zip file</a>
@@ -42,66 +42,33 @@
 
 <p>IDLSitools2_1.0 is a generic IDL Sitools2V1.0 client</p>
 
-<p>IDLSitools2 tool has been designed by MEDOC at IAS (Institut d'Astrophysique Spatiale) to perform all operations available within Sitools2.</p>
+<p>IDLSitools2 tool has been designed by MEDOC at IAS (Institut d'Astrophysique Spatiale) to perform all operations available within Sitools2 via IDL.</p>
 
-<p>The code defines several classes of Sitools2: Sitools2Instance, Field, Query, Dataset and Project. </p>
-
-<h2>
-<a name="building-idlsitools2_10" class="anchor" href="#building-idlsitools2_10"><span class="octicon octicon-link"></span></a>Building IDLSitools2_1.0</h2>
-
-<h3>
-<a name="getting-the-sources" class="anchor" href="#getting-the-sources"><span class="octicon octicon-link"></span></a>Getting the sources</h3>
-
-<pre><code>$ git clone https://github.com/PabloIAS/IDLSitools2_1.0.git IDLSitools2_1.0
-
-    The retrieved module structure is the following:
-        LICENCE
-        README.md
-        -- clients
-            -- MEDIA
-                README_MEDIA.txt
-                media_get.pro
-        media_get_selection.pro
-        media_search.pro
-        sdoaiadataset__define.pro
-        sdodata__define.pro
-        sdoiasdataset__define.pro
-            -- GAIA-DEM
-                README_GAIA.txt
-        gaiadata__define.pro
-        gaiadataset__define.pro
-        gaia_get.pro
-        gaia_get_selection.pro
-        gaia_search.pro
-        -- core
-    dataset__define.pro
-    field__define.pro
-    project__define.pro
-    query__define.pro
-    sitools2Instance__define.pro
-    -- examples
-            example_media.pro
-            example_gaia.pro
-</code></pre>
+<p>The code allow you to interrogate the medoc-sdo.ias.u-psud.fr &amp; medoc-dem.ias.u-psud.fr servers.  </p>
 
 <h2>
 <a name="installing-the-module" class="anchor" href="#installing-the-module"><span class="octicon octicon-link"></span></a>Installing the module</h2>
 
-<h3>
-<a name="installing-the-module-for-the-system" class="anchor" href="#installing-the-module-for-the-system"><span class="octicon octicon-link"></span></a>Installing the module for the system</h3>
+<pre><code>- Download the last archive file 
 
-<pre><code>    $ download the last archive file 
-  extract the content of IDLSitools2_1.0.tar.gz into your favourite directory ex : /usr/local/Sitools2Client
-  add the install directory to your env var 'IDL_PATH' ex : IDL_PATH=$IDL_PATH:+/usr/local/Sitools2Client/
+     $ wget http://pabloias.github.io/IDLSitools2_1.0/archives/IDLSitools2_1.0.tar.gz
+
+
+- Extract the content of IDLSitools2_1.0.tar.gz or IDLSitools2_1.0.zip into your favourite directory 
+
+     $ tar xzvf IDLSitools2_1.0.tar.gz /usr/local/Sitools2Client
+
+
+- Add the install directory to your env var 'IDL_PATH' 
+
+     $ export IDL_PATH=$IDL_PATH:+/usr/local/Sitools2Client/
 </code></pre>
 
 <h2>
 <a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h2>
 
 <ul>
-<li>Defines several classes of Sitools2: Sitools2Instance, Field, Query, Dataset and Project</li>
 <li>Make a search providing a date range, if needed a wavelength and a cadence.</li>
-<li>Filter the results with specific keyword values (e.g. filter on quality, cdelt...)</li>
 <li>Download the results of your search.</li>
 </ul><h2>
 <a name="examples-of-application" class="anchor" href="#examples-of-application"><span class="octicon octicon-link"></span></a>Examples of application</h2>
