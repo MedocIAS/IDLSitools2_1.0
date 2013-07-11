@@ -4,16 +4,19 @@ function  media_search, DATES=dates_value,WAVES=waves_list,CADENCE=cadence_list,
 	
 	IF n_elements(dates_value) EQ 0 THEN message, "Provide dates please" ELSE DATES=dates_value
 	IF n_elements(waves_list) EQ 0 THEN WAVES=LIST('94','131','171','193','211','304','335','1600','1700') ELSE WAVES=waves_list
-	IF n_elements(cadence_list) EQ 0 THEN CADENCE=LIST('1+min') ELSE CADENCE=cadence_list
+	IF n_elements(cadence_list) EQ 0 THEN CADENCE=LIST('1 min') ELSE CADENCE=cadence_list
 	IF n_elements(nbresmax_value) EQ 0 THEN NB_RES_MAX=-1 ELSE NB_RES_MAX=nbresmax_value
-
+	allowed_cadence=HASH('1 min', '1+min', '1m', '1+min','2 min', '2+min', '2m', '2+min', '10 min', '10+min', '10m', '10+min')
+	allowed_cadence+=HASH('30 min', '30+min', '30m', '30+min','1 h', '1+h', '1h', '1+h', '2 h', '2+h', '2h', '2+h')
+	allowed_cadence+=HASH('6 h', '6+h', '6h', '6+h','12 h', '12+h', '12h', '12+h', '1 day', '1+day', '1d', '1+day')
+	IF (allowed_cadence.keys()).WHERE(CADENCE) EQ !NULL THEN message, "Cadence should be in list '1 min', '2 min', '10 min ', '30 min', '1 h', '2 h', '6 h', '12 h', '1 day' or you can use shortcuts as '1m', '2h' or '1d'"
 	sdo_dataset=obj_new('sdoIasDataset')
 
 	PRINT, "Loading MEDIA Sitools2 client : ",sdo_dataset->get_sitools2_url()
 	fields_list=(sdo_dataset->get_attributes()).FIELDS_LIST
 	dates_param=LIST([fields_list[4]],DATES,'DATE_BETWEEN')
 	waves_param=LIST([fields_list[5]],WAVES,'IN')
-	cadence_param=LIST([fields_list[10]],CADENCE,'CADENCE')
+	cadence_param=LIST([fields_list[10]],allowed_cadence[CADENCE],'CADENCE')
 
 	Q1=obj_new('query',dates_param)
 	Q2=obj_new('query',waves_param)
