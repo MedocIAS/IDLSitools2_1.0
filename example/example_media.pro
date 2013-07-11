@@ -1,7 +1,7 @@
 pro example_media
 	compile_opt idl2
 
-	sdo_list=media_search( DATES=LIST('2011-01-01T00:00','2011-01-01T00:05') , WAVES=LIST('304','193') , CADENCE=LIST('1+min'),  NB_RES_MAX=10)
+	sdo_list=media_search( DATES=LIST('2011-01-01T00:00','2011-01-01T00:05') , WAVES=LIST('304','193') , CADENCE=LIST('1 min'),  NB_RES_MAX=10)
 ;; Print attributes	
 	FOREACH sdo_data_item, sdo_list DO PRINT, sdo_data_item->get_attributes()
 
