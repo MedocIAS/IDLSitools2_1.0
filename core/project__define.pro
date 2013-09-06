@@ -14,6 +14,7 @@ end
 
 pro project::compute_attributes,url
 	compile_opt idl2
+
 	self.uri="/"+(strsplit(url,"/",/EXTRACT))[-1]
 	self.url=url
 	str_url=self.url+'?media=json'
