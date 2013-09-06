@@ -34,22 +34,25 @@ pro dataset::compute_attributes,url
 	self.name=result['name']
 	self.description=result['description']
 	columns=result['columnModel']
+;	PRINT, JSON_SERIALIZE(columns)
 	FOR i=0, n_elements(columns)-1 DO BEGIN 
-		key= (columns[i])['columnAlias']
-		field=obj_new('field',columns[i])
-		self.fields_list.Add,field
-		self.fields_struct+=HASH(key,field)
-		IF columns[i].haskey('filter') THEN BEGIN 
-			IF (columns[i])['filter'] THEN self.filter_list.Add,field 
-		ENDIF
-		IF columns[i].haskey('sortable') THEN BEGIN 
-			IF (columns[i])['sortable'] THEN self.sort_list.Add,field 
-		ENDIF
-		IF columns[i].haskey('primaryKey') THEN BEGIN 
-			IF (columns[i])['primaryKey'] THEN self.primary_key=field 
-		ENDIF
-		IF columns[i].haskey('columnRenderer') THEN BEGIN 
-			IF ((columns[i])['columnRenderer'])['behavior'] EQ "noClientAccess" THEN self.no_Client_Access_list.Add,field->get_name()
+		IF  TYPENAME(columns[i])  eq 'HASH' THEN BEGIN
+			key= (columns[i])['columnAlias']
+			field=obj_new('field',columns[i])
+			self.fields_list.Add,field
+			self.fields_struct+=HASH(key,field)
+			IF columns[i].haskey('filter') THEN BEGIN 
+				IF (columns[i])['filter'] THEN self.filter_list.Add,field 
+			ENDIF
+			IF columns[i].haskey('sortable') THEN BEGIN 
+				IF (columns[i])['sortable'] THEN self.sort_list.Add,field 
+			ENDIF
+			IF columns[i].haskey('primaryKey') THEN BEGIN 
+				IF (columns[i])['primaryKey'] THEN self.primary_key=field 
+			ENDIF
+			IF columns[i].haskey('columnRenderer') THEN BEGIN 
+				IF ((columns[i])['columnRenderer'])['behavior'] EQ "noClientAccess" THEN self.no_Client_Access_list.Add,field->get_name()
+			ENDIF
 		ENDIF
 	ENDFOR
 
@@ -250,7 +253,7 @@ function dataset::search,query_list,output_list,sort_list,limit_request=limit_re
 							result_dict+=HASH(key, value)
 						ENDELSE
 
-					ENDIF 
+					ENDIF
 				ENDFOREACH
 				results.Add,result_dict
 			ENDFOREACH
@@ -301,12 +304,15 @@ pro dataset::resources_list
 	json_result=JSON_PARSE(STRJOIN(json))
 	data_result=json_result['data']
 	FOREACH data_item, data_result DO BEGIN
-		parameters_data=data_item['parameters']
-		FOREACH param, parameters_data DO BEGIN 
-			IF param['name'] EQ 'url' THEN BEGIN
-				 self.resources_list.Add, self.url+param['value']
-			ENDIF 
-		ENDFOREACH 
+		IF  TYPENAME(data_item)  eq 'HASH' THEN BEGIN 
+			parameters_data=data_item['parameters']
+			PRINT, JSON_SERIALIZE( parameters_data)
+			FOREACH param, parameters_data DO BEGIN 
+				IF param['name'] EQ 'url' AND TYPENAME(data_item) eq 'HASH' THEN BEGIN
+					 self.resources_list.Add, self.url+param['value']
+				ENDIF 
+			ENDFOREACH
+		ENDIF 
 	ENDFOREACH
 	OBJ_DESTROY, oUrl
 	return
