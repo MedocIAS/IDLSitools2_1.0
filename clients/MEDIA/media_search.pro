@@ -20,7 +20,7 @@ function  media_search, DATES=dates_value,WAVES=waves_list,CADENCE=cadence_list,
 	fields_list=(sdo_dataset->get_attributes()).FIELDS_LIST
 	dates_param=LIST([fields_list[4]],DATES,'DATE_BETWEEN')
 	waves_param=LIST([fields_list[5]],WAVES,'IN')
-	PRINT , "Cadence : " , CADENCE , "allowed_cadence['1 min '] : ",allowed_cadence['1 min']
+;;	PRINT , "Cadence : " , CADENCE , "allowed_cadence['1 min '] : ",allowed_cadence['1 min']
 	cadence_param=LIST([fields_list[10]],allowed_cadence[CADENCE[0]],'CADENCE')
 
 	Q1=obj_new('query',dates_param)
