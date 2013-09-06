@@ -30,9 +30,14 @@ function sitools2Instance::list_project
 	json_result=JSON_PARSE(STRJOIN(json))
 	print, STRTRIM(json_result['total'],2 ) +" projets detected"
 	data_result=json_result['data']
+;	PRINT, JSON_SERIALIZE( data_result)
+
 	for i=0, n_elements(data_result)-1 do begin 
-		url_project=sitools_url+(data_result[i])['sitoolsAttachementForUsers']
-		result.Add,obj_new('project',url_project)
+		IF  TYPENAME(data_result[i])  eq 'HASH' THEN BEGIN 
+			url_project=sitools_url+(data_result[i])['sitoolsAttachementForUsers']
+			result.Add,obj_new('project',url_project)
+		ENDIF
+		
 	endfor
 	OBJ_DESTROY, oUrl
 	return, result
