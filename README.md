@@ -95,7 +95,8 @@ This IDL module will allow you to :
 		IF meta_data_search['quality'] EQ 0 THEN  file=sdo_item->get_file(TARGET_DIR='/tmp')
 	ENDFOREACH
 
-  
+NB : For more information see the [README ](http://sdo.ias.u-psud.fr/IDL/media/README_MEDIA.txt) file.
+
 ### GAIA-DEM
 
 This IDL module will allow you to :
@@ -114,6 +115,8 @@ This IDL module will allow you to :
 
     - Download a tar ball file (slower):
 	$ gaia_tar_collect=gaia_get (GAIA_LIST=gaia_list,DOWNLOAD_TYPE="tar", target_dir="/tmp" ,FILENAME="my_download_file.tar")
+
+NB : For more information see the [README ](http://sdo.ias.u-psud.fr/IDL/media/README_GAIA.txt) file.
 
 ###Requirements
 
