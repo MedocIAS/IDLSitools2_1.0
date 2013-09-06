@@ -306,7 +306,6 @@ pro dataset::resources_list
 	FOREACH data_item, data_result DO BEGIN
 		IF  TYPENAME(data_item)  eq 'HASH' THEN BEGIN 
 			parameters_data=data_item['parameters']
-			PRINT, JSON_SERIALIZE( parameters_data)
 			FOREACH param, parameters_data DO BEGIN 
 				IF param['name'] EQ 'url' AND TYPENAME(data_item) eq 'HASH' THEN BEGIN
 					 self.resources_list.Add, self.url+param['value']
