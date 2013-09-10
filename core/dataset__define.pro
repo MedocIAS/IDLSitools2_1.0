@@ -307,8 +307,10 @@ pro dataset::resources_list
 		IF  TYPENAME(data_item)  eq 'HASH' THEN BEGIN 
 			parameters_data=data_item['parameters']
 			FOREACH param, parameters_data DO BEGIN 
-				IF param['name'] EQ 'url' AND TYPENAME(data_item) eq 'HASH' THEN BEGIN
-					 self.resources_list.Add, self.url+param['value']
+				IF TYPENAME(parameters_data) eq 'HASH'THEN BEGIN 
+					IF param['name'] EQ 'url' THEN BEGIN
+						self.resources_list.Add, self.url+param['value']
+					ENDIF
 				ENDIF 
 			ENDFOREACH
 		ENDIF 
