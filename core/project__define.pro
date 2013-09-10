@@ -56,8 +56,11 @@ function project::dataset_list
 	json = oUrl.Get(/STRING_ARRAY)
 	json_result=JSON_PARSE(STRJOIN(json))
 	data_result=json_result['data']
+;;	PRINT, JSON_SERIALIZE( data_result)
 	for i=0, n_elements(data_result)-1 do begin 
-		url_dataset=(strsplit(self.url,"/",/EXTRACT))[0]+(data_result[i])['url']
+			IF TYPENAME(parameters_data) eq 'HASH'THEN BEGIN 
+				url_dataset=(strsplit(self.url,"/",/EXTRACT))[0]+(data_result[i])['url']
+			ENDIF
 	endfor
 	OBJ_DESTROY, oUrl
 	return, url_dataset
