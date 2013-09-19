@@ -10,7 +10,20 @@ function  media_search, DATES=dates_value,WAVES=waves_list,CADENCE=cadence_list,
 	allowed_cadence+=HASH('30 min', '30+min', '30m', '30+min','1 h', '1+h', '1h', '1+h', '2 h', '2+h', '2h', '2+h')
 	allowed_cadence+=HASH('6 h', '6+h', '6h', '6+h','12 h', '12+h', '12h', '12+h', '1 day', '1+day', '1d', '1+day')
 	allowed_waves=LIST('94','131','171','193','211','304','335','1600','1700')
-	IF (allowed_cadence.keys()).WHERE(CADENCE) EQ !NULL THEN message, "Cadence should be in list '1 min', '2 min', '10 min ', '30 min', '1 h', '2 h', '6 h', '12 h', '1 day' or you can use shortcuts as '1m', '2h' or '1d'"
+	IF TYPENAME(CADENCE) EQ 'STRING' THEN CADENCE=LIST(CADENCE)
+	IF TYPENAME(WAVES) EQ 'INT' THEN WAVES=LIST(STRCOMPRESS(WAVES, /REMOVE_ALL))
+	WAVES_STRING=LIST()
+	IF TYPENAME(WAVES) EQ 'LIST' THEN BEGIN 
+		FOREACH wave, WAVES DO BEGIN
+			IF TYPENAME(wave) EQ 'INT' THEN BEGIN
+				WAVES_STRING.ADD, STRCOMPRESS(wave, /REMOVE_ALL),WAVES.WHERE(wave)
+			ENDIF ELSE BEGIN 
+				WAVES_STRING.ADD,wave
+			ENDELSE
+		ENDFOREACH
+		WAVES=WAVES_STRING
+	ENDIF
+	IF (allowed_cadence.keys()).WHERE(CADENCE[0]) EQ !NULL THEN message, "Cadence should be in list '1 min', '2 min', '10 min ', '30 min', '1 h', '2 h', '6 h', '12 h', '1 day' or you can use shortcuts as '1m', '2h' or '1d'"
 	FOREACH wave,WAVES DO BEGIN 
 		IF allowed_waves.WHERE(wave) EQ !NULL THEN message, "Waves not allowed, it should be in list '94','131','171','193','211','304','335','1600','1700'"
 	ENDFOREACH
