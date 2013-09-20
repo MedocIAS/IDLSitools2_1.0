@@ -58,6 +58,14 @@ function sdodata::get_sunum
 	return,value
 end
 
+function sdodata::get_ias_location
+	compile_opt idl2
+
+	value=''
+	if self.ias_location ne '' then value=self.ias_location
+	return,value
+end
+
 
 function sdodata::get_file, DECOMPRESS=decompress_value, FILENAME=filename_value, TARGET_DIR=target_dir_value, QUIET=quiet_value
 	compile_opt idl2
