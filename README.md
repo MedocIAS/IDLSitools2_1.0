@@ -3,9 +3,9 @@
 ## Description
 IDLSitools2_1.0 is a generic IDL Sitools2V1.0 client
 
-IDLSitools2 tool has been designed by MEDOC at IAS (Institut d'Astrophysique Spatiale) to perform all operations available within Sitools2.
+IDLSitools2 tool has been designed by MEDOC at IAS (Institut d'Astrophysique Spatiale) to perform all operations available within Sitools2 via IDL.
 
-The code defines several classes of Sitools2: Sitools2Instance, Field, Query, Dataset and Project. 
+The IDLSitools2 routines allow you to interrogate Sitools2 server especially MEDIA & GAIA-DEM servers. 
 
 ## Building IDLSitools2_1.0
 
@@ -42,25 +42,20 @@ The code defines several classes of Sitools2: Sitools2Instance, Field, Query, Da
                 example_media.pro
                 example_gaia.pro
 
-### Testing the module
-
-	$ To be done ....
-
 ## Installing the module
+	- Download the last archive file using the buttons above.
+	NB: Use the following command for a linux server :
+     	$ git clone https://github.com/PabloIAS/IDLSitools2_1.0.git IDLSitools2_1.0  (git required)
 
-### Installing the module for the system
-
-        $ download the last archive file 
+	or 
+        - Download the last archive file 
 	  extract the content of IDLSitools2_1.0.tar.gz into your favourite directory ex : /usr/local/Sitools2Client
-	  add the install directory to your env var 'IDL_PATH' ex : IDL_PATH=$IDL_PATH:+/usr/local/Sitools2Client/
 
-### Installing the module for the user
-
-        $ To be done
+	-Add the install directory to your env var 'IDL_PATH'
+	$ export IDL_PATH=$IDL_PATH:+/usr/local/Sitools2Client/
 
 ## Features
 
-- Defines several classes of Sitools2: Sitools2Instance, Field, Query, Dataset and Project
 - Make a search providing a date range, if needed a wavelength and a cadence.
 - Filter the results with specific keyword values (e.g. filter on quality, cdelt...)
 - Download the results of your search.
@@ -73,10 +68,10 @@ This IDL module will allow you to :
 
     - Make a request using the media_search() function.
 
-        $ sdo_list=media_search( DATES=LIST('2011-01-01T00:00','2011-01-01T00:05') , WAVES=LIST('304','193') , CADENCE=LIST('1+min'),  NB_RES_MAX=10)
+        $ sdo_list=media_search( DATES=LIST('2011-01-01T00:00','2011-01-01T00:05') , WAVES=LIST(304,193) , CADENCE='1 min',  NB_RES_MAX=10)
 
 
-    - Simply download the result of your previous search() calling the media_get()function.
+    - Simply download the result of your previous search() calling the media_get() function.
     
         $ media_execute=media_get(MEDIA_DATA_LIST=sdo_list)
 
@@ -95,8 +90,7 @@ This IDL module will allow you to :
 		IF meta_data_search['quality'] EQ 0 THEN  file=sdo_item->get_file(TARGET_DIR='/tmp')
 	ENDFOREACH
 
-NB : For more information see the [README ](http://sdo.ias.u-psud.fr/IDL/media/README_MEDIA.txt) file.
-
+  
 ### GAIA-DEM
 
 This IDL module will allow you to :
@@ -115,8 +109,6 @@ This IDL module will allow you to :
 
     - Download a tar ball file (slower):
 	$ gaia_tar_collect=gaia_get (GAIA_LIST=gaia_list,DOWNLOAD_TYPE="tar", target_dir="/tmp" ,FILENAME="my_download_file.tar")
-
-NB : For more information see the [README ](http://sdo.ias.u-psud.fr/IDL/media/README_GAIA.txt) file.
 
 ###Requirements
 
