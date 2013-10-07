@@ -49,7 +49,7 @@ The IDLSitools2 routines allow you to interrogate Sitools2 server especially MED
 
 	or 
         - Download the last archive file 
-	  extract the content of IDLSitools2_1.0.tar.gz into your favourite directory ex : /usr/local/Sitools2Client
+	Extract the content of IDLSitools2_1.0.tar.gz into your favourite directory ex : /usr/local/Sitools2Client
 
 	-Add the install directory to your env var 'IDL_PATH'
 	$ export IDL_PATH=$IDL_PATH:+/usr/local/Sitools2Client/
@@ -83,12 +83,12 @@ This IDL module will allow you to :
 
     - Filter on a specific keyword before download data using the get_file() method.
 	
-	FOREACH sdo_item, sdo_list DO BEGIN
+	$ FOREACH sdo_item, sdo_list DO BEGIN
 		meta_data_search=sdo_item->metadata_search(KEYWORDS=LIST('quality','cdelt1','cdelt2'))
 		PRINT, JSON_SERIALIZE(meta_data_search)
 		file=obj_new()
 		IF meta_data_search['quality'] EQ 0 THEN  file=sdo_item->get_file(TARGET_DIR='/tmp')
-	ENDFOREACH
+	  ENDFOREACH
 
   
 ### GAIA-DEM
