@@ -66,6 +66,21 @@ function sdodata::get_ias_location
 	return,value
 end
 
+function sdodata::get_date_obs
+	compile_opt idl2
+
+	value=''
+	if self.date_obs ne '' then value=self.date_obs
+	return,value
+end
+
+function sdodata::get_wave
+	compile_opt idl2
+
+	value=''
+	if self.wave ne '' then value=self.wave
+	return,value
+end
 
 function sdodata::get_file, DECOMPRESS=decompress_value, FILENAME=filename_value, TARGET_DIR=target_dir_value, QUIET=quiet_value
 	compile_opt idl2
