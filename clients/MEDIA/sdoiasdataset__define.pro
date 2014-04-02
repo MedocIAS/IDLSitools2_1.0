@@ -1,6 +1,7 @@
 
 function  sdoiasdataset::init
 	compile_opt idl2
+
 	self.sitools2_url="medoc-sdo.ias.u-psud.fr"	
 	self.sdo_dataset_uri="/webs_IAS_SDO_dataset"
 	sdo_url=self.sitools2_url+self.sdo_dataset_uri

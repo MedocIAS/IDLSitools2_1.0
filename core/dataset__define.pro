@@ -15,6 +15,7 @@ function dataset::init,url
 	self.no_Client_Access_list=LIST()
 	self.resources_list=LIST()
 	self.primary_key=OBJ_NEW()
+
 	self->compute_attributes,url
 	self->resources_list
 	return,1
@@ -22,49 +23,69 @@ end
 
 pro dataset::compute_attributes,url
 	compile_opt idl2
+	
 	self.uri="/"+(strsplit(url,"/",/EXTRACT))[-1]
+	service=(strsplit(url,"/",/EXTRACT))[0]
 	self.url=url
 	str_url=self.url+'?media=json'
 	oUrl=OBJ_NEW('IDLnetUrl')
 	oUrl.SetProperty, url_scheme='http'
 	oUrl.SetProperty, URL_HOST=str_url
-	json = oUrl.Get(/STRING_ARRAY)
-	json_result=JSON_PARSE(STRJOIN(json))
-	result=json_result['dataset']
-	self.name=result['name']
-	self.description=result['description']
-	columns=result['columnModel']
-;	PRINT, JSON_SERIALIZE(columns)
-	FOR i=0, n_elements(columns)-1 DO BEGIN 
-		IF  TYPENAME(columns[i])  eq 'HASH' THEN BEGIN
-			key= (columns[i])['columnAlias']
-			field=obj_new('field',columns[i])
-			self.fields_list.Add,field
-			self.fields_struct+=HASH(key,field)
-			IF columns[i].haskey('filter') THEN BEGIN 
+; If the url object throws an error it will be caught here
+; Get the properties that will tell us more about the error.
+;	oUrl->GetProperty, RESPONSE_CODE=rspCode, RESPONSE_HEADER=rspHdr, RESPONSE_FILENAME=rspFn
+;	PRINT ,"rspCode : ",rspCode
+;	PRINT ,"rspHdr : ",rspHdr
+   	CATCH, Error_status
+;;	PRINT , "Error_status : ", Error_status
+	IF (Error_status NE 0) THEN BEGIN
+		PRINT , "compute_attributes() fails, dataset service at ",service," is not available."
+		OBJ_DESTROY, oUrl
+		CATCH, /CANCEL
+		MESSAGE, /REISSUE_LAST
+	ENDIF ELSE BEGIN
+		json = oUrl.Get(/STRING_ARRAY)
+		json_result=JSON_PARSE(STRJOIN(json))
+		result=json_result['dataset']
+	;;	PRINT, JSON_SERIALIZE(result)
+		self.name=result['name']
+		self.description=result['description']
+		self.status=result['status']
+		columns=result['columnModel']
+	;;	PRINT, JSON_SERIALIZE(columns)
+		FOR i=0, n_elements(columns)-1 DO BEGIN 
+			IF  TYPENAME(columns[i])  eq 'HASH' THEN BEGIN
+				key= (columns[i])['columnAlias']
+	;;			PRINT, key
+				field=obj_new('field',columns[i])
+	;;			PRINT, field
+				self.fields_list.Add,field
+				self.fields_struct+=HASH(key,field)
+				IF columns[i].haskey('filter') THEN BEGIN 
 				IF (columns[i])['filter'] THEN self.filter_list.Add,field 
+				ENDIF
+				IF columns[i].haskey('sortable') THEN BEGIN 
+					IF (columns[i])['sortable'] THEN self.sort_list.Add,field 
+				ENDIF
+				IF columns[i].haskey('primaryKey') THEN BEGIN 
+					IF (columns[i])['primaryKey'] THEN self.primary_key=field 
+				ENDIF
+				IF columns[i].haskey('columnRenderer') THEN BEGIN 
+					IF ((columns[i])['columnRenderer'])['behavior'] EQ "noClientAccess" THEN self.no_Client_Access_list.Add,field->get_name()
+				ENDIF
 			ENDIF
-			IF columns[i].haskey('sortable') THEN BEGIN 
-				IF (columns[i])['sortable'] THEN self.sort_list.Add,field 
-			ENDIF
-			IF columns[i].haskey('primaryKey') THEN BEGIN 
-				IF (columns[i])['primaryKey'] THEN self.primary_key=field 
-			ENDIF
-			IF columns[i].haskey('columnRenderer') THEN BEGIN 
-				IF ((columns[i])['columnRenderer'])['behavior'] EQ "noClientAccess" THEN self.no_Client_Access_list.Add,field->get_name()
-			ENDIF
-		ENDIF
-	ENDFOR
+		ENDFOR
 
-	FOR i=0, n_elements(self.filter_list)-1 DO BEGIN
-		name=((self.filter_list)[i]).name
-		self.allowed_filter_list.Add,name
-	ENDFOR
-	FOR i=0, n_elements(self.sort_list)-1 DO BEGIN
-		name=((self.sort_list)[i]).name
-		self.allowed_sort_list.Add,name
-	ENDFOR
-	OBJ_DESTROY, oUrl
+		FOR i=0, n_elements(self.filter_list)-1 DO BEGIN
+			name=((self.filter_list)[i]).name
+			self.allowed_filter_list.Add,name
+		ENDFOR
+		FOR i=0, n_elements(self.sort_list)-1 DO BEGIN
+			name=((self.sort_list)[i]).name
+			self.allowed_sort_list.Add,name
+		ENDFOR
+		OBJ_DESTROY, oUrl
+	ENDELSE
 end
 
 function dataset::get_attributes
@@ -74,6 +95,7 @@ function dataset::get_attributes
 			description : self.description,$
 			uri : self.uri,$
 			url : self.url,$
+			status : self.status,$
 			fields_list : self.fields_list,$
 			fields_struct :self.fields_struct,$
 			filter_list :self.filter_list,$
@@ -101,9 +123,18 @@ function dataset::get_uri
 	return,value
 end
 
-function dataset::search,query_list,output_list,sort_list,limit_request=limit_request_value, limit_to_nb_res_max=limit_to_nb_res_max_value
+function dataset::get_status
 	compile_opt idl2
 
+	value=''
+	if self.status ne '' then value=self.status
+	return,value
+end
+
+function dataset::search,query_list,output_list,sort_list,limit_request=limit_request_value, limit_to_nb_res_max=limit_to_nb_res_max_value
+	compile_opt idl2
+	ON_ERROR, 2
+	
 	i=0;;filter counter
 	j=0;;p counter
 	IF n_elements(limit_request_value) EQ 0 THEN limit_request=350000 ELSE limit_request=limit_request_value
@@ -253,7 +284,7 @@ function dataset::search,query_list,output_list,sort_list,limit_request=limit_re
 							result_dict+=HASH(key, value)
 						ENDELSE
 
-					ENDIF
+					ENDIF 
 				ENDFOREACH
 				results.Add,result_dict
 			ENDFOREACH
@@ -295,28 +326,41 @@ end
 
 pro dataset::resources_list
 	compile_opt idl2
-	
+
+	service=(strsplit(self.url,"/",/EXTRACT))[0]
 	url=self.url+"/services?media=json"
 	oUrl=OBJ_NEW('IDLnetUrl')
 	oUrl.SetProperty, url_scheme='http'
 	oUrl.SetProperty, URL_HOST=url
-	json = oUrl.Get(/STRING_ARRAY)
-	json_result=JSON_PARSE(STRJOIN(json))
-	data_result=json_result['data']
-	FOREACH data_item, data_result DO BEGIN
-		IF  TYPENAME(data_item)  eq 'HASH' THEN BEGIN 
-			parameters_data=data_item['parameters']
-			FOREACH param, parameters_data DO BEGIN 
-				IF TYPENAME(parameters_data) eq 'HASH'THEN BEGIN 
-					IF param['name'] EQ 'url' THEN BEGIN
-						self.resources_list.Add, self.url+param['value']
-					ENDIF
-				ENDIF 
-			ENDFOREACH
-		ENDIF 
-	ENDFOREACH
-	OBJ_DESTROY, oUrl
-	return
+
+  	CATCH, Error_status
+	IF (Error_status NE 0) THEN BEGIN
+		; Get the properties that will tell us more about the error.
+;;		oUrl->GetProperty, RESPONSE_CODE=rspCode, RESPONSE_HEADER=rspHdr, RESPONSE_FILENAME=rspFn
+		PRINT , "resources_list() fails, dataset service at ",service," not available."
+      ; Destroy the url object
+		OBJ_DESTROY, oUrl
+		CATCH, /CANCEL
+		MESSAGE, /REISSUE_LAST
+	ENDIF ELSE BEGIN	
+		json = oUrl.Get(/STRING_ARRAY)
+		json_result=JSON_PARSE(STRJOIN(json))
+		data_result=json_result['data']
+		FOREACH data_item, data_result DO BEGIN
+			IF  TYPENAME(data_item)  eq 'HASH' THEN BEGIN 
+				parameters_data=data_item['parameters']
+				FOREACH param, parameters_data DO BEGIN 
+					IF TYPENAME(parameters_data) eq 'HASH'THEN BEGIN 
+						IF param['name'] EQ 'url' THEN BEGIN
+							self.resources_list.Add, self.url+param['value']
+						ENDIF
+					ENDIF 
+				ENDFOREACH
+			ENDIF 
+		ENDFOREACH
+		OBJ_DESTROY, oUrl
+		return
+	ENDELSE
 end
 
 
@@ -347,6 +391,7 @@ pro dataset__define
 			description : '',$
 			uri : '',$
 			url : '',$
+			status : '',$
 			fields_list : LIST(),$
 			fields_struct : OBJ_NEW(),$
 			filter_list : LIST(),$

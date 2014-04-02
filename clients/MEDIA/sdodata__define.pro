@@ -41,12 +41,19 @@ function sdodata::get_attributes
 	return,attributes
 end
 
-
 function sdodata::get_url
 	compile_opt idl2
 
 	value=''
 	if self.url ne '' then value=self.url
+	return,value
+end
+
+function sdodata::get_recnum
+	compile_opt idl2
+
+	value=''
+	if self.recnum ne '' then value=self.recnum
 	return,value
 end
 
@@ -58,6 +65,22 @@ function sdodata::get_sunum
 	return,value
 end
 
+function sdodata::get_date_obs
+       compile_opt idl2
+
+       value=''
+       if self.date_obs ne '' then value=self.date_obs
+       return,value
+end
+
+function sdodata::get_wave
+	compile_opt idl2
+
+	value=''
+	if self.wave ne '' then value=self.wave
+	return,value
+end
+
 function sdodata::get_ias_location
 	compile_opt idl2
 
@@ -66,19 +89,19 @@ function sdodata::get_ias_location
 	return,value
 end
 
-function sdodata::get_date_obs
+function sdodata::get_exptime
 	compile_opt idl2
 
 	value=''
-	if self.date_obs ne '' then value=self.date_obs
+	if self.exptime ne '' then value=self.exptime
 	return,value
 end
 
-function sdodata::get_wave
+function sdodata::get_t_rec_index
 	compile_opt idl2
 
 	value=''
-	if self.wave ne '' then value=self.wave
+	if self.t_rec_index ne '' then value=self.t_rec_index
 	return,value
 end
 

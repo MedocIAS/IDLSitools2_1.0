@@ -18,7 +18,7 @@ pro query::compute_attributes,param_list
 	self.fields_list=LIST(param_list[0], /EXTRACT)
 	self.value_list=LIST(param_list[1], /EXTRACT)
 	FOREACH element,self.value_list DO BEGIN
-		self.value_list_str+=element+" " 
+		self.value_list_str+=STRCOMPRESS(element, /REMOVE_ALL)+" " 
 	ENDFOREACH
 	self.value_list_str=STRTRIM(self.value_list_str,2 )
 	self.operation=param_list[2]

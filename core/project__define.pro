@@ -14,7 +14,6 @@ end
 
 pro project::compute_attributes,url
 	compile_opt idl2
-
 	self.uri="/"+(strsplit(url,"/",/EXTRACT))[-1]
 	self.url=url
 	str_url=self.url+'?media=json'
@@ -56,14 +55,18 @@ function project::dataset_list
 	json = oUrl.Get(/STRING_ARRAY)
 	json_result=JSON_PARSE(STRJOIN(json))
 	data_result=json_result['data']
-;;	PRINT, JSON_SERIALIZE( data_result)
+;;	PRINT, JSON_SERIALIZE(data_result)
+	
 	for i=0, n_elements(data_result)-1 do begin 
-			IF TYPENAME(parameters_data) eq 'HASH'THEN BEGIN 
-				url_dataset=(strsplit(self.url,"/",/EXTRACT))[0]+(data_result[i])['url']
-			ENDIF
+		IF  TYPENAME(data_result[i])  eq 'HASH' THEN BEGIN
+			url_dataset=(strsplit(self.url,"/",/EXTRACT))[0]+(data_result[i])['url']
+			dataset=obj_new('dataset',url_dataset)
+			result.Add, dataset
+;;			PRINT, JSON_SERIALIZE(data_result)
+		ENDIF
 	endfor
 	OBJ_DESTROY, oUrl
-	return, url_dataset
+	return, result
 
 end
 
