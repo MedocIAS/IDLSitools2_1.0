@@ -39,7 +39,7 @@ pro dataset::compute_attributes,url
    	CATCH, Error_status
 ;;	PRINT , "Error_status : ", Error_status
 	IF (Error_status NE 0) THEN BEGIN
-		PRINT , "compute_attributes() fails, dataset service at ",service," is not available."
+		PRINT , "dataset::compute_attributes() fails, dataset service at ",service," is not available."
 		OBJ_DESTROY, oUrl
 		CATCH, /CANCEL
 		MESSAGE, /REISSUE_LAST

@@ -15,6 +15,16 @@ end
 pro query::compute_attributes,param_list
 	compile_opt idl2
 
+  	CATCH, Error_status
+;;	PRINT , "Error_status : ", Error_status
+	IF (Error_status NE 0) THEN BEGIN
+		PRINT , "query::compute_attributes() fails, dataset service at ",service," is not available."
+		OBJ_DESTROY, oUrl
+		CATCH, /CANCEL
+		MESSAGE, /REISSUE_LAST
+	ENDIF ELSE BEGIN
+
+
 	self.fields_list=LIST(param_list[0], /EXTRACT)
 	self.value_list=LIST(param_list[1], /EXTRACT)
 	FOREACH element,self.value_list DO BEGIN
