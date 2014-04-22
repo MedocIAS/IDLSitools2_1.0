@@ -1,13 +1,13 @@
 pro example_media
 	compile_opt idl2
 
-	sdo_list=media_search( DATES=LIST('2011-01-01T00:00','2011-01-06T00:05') , WAVES=LIST('304','193') , CADENCE=LIST('1 min'),  NB_RES_MAX=200)
+	sdo_list=media_search( DATES=LIST('2011-01-01T00:00','2011-01-06T00:05') , WAVES=LIST('304','193') , CADENCE=LIST('1 min'),  NB_RES_MAX=10)
 ;; Print attributes	
 	recnum_list=LIST()
 	FOREACH sdo_data_item, sdo_list DO recnum_list.add, sdo_data_item->get_recnum()
 	PRINT, N_ELEMENTS(recnum_list)
 ;; The fastest way to retrieve data
-;;	media_execute=media_get(MEDIA_DATA_LIST=sdo_list, TARGET_DIR="/tmp")
+	media_execute=media_get(MEDIA_DATA_LIST=sdo_list, TARGET_DIR="/tmp")
 
 ;;Need to get a tar ball or zip file :
 ;;A bit slower than the previous one
