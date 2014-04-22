@@ -131,6 +131,15 @@ function dataset::get_status
 	return,value
 end
 
+function dataset::get_fields_struct
+	compile_opt idl2
+
+	value=''
+	if self.fields_struct ne '' then value=self.fields_struct
+	return,value
+end
+
+
 function dataset::search,query_list,output_list,sort_list,limit_request=limit_request_value, limit_to_nb_res_max=limit_to_nb_res_max_value
 	compile_opt idl2
 	ON_ERROR, 2
