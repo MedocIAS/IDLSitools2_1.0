@@ -39,7 +39,7 @@ pro dataset::compute_attributes,url
    	CATCH, Error_status
 ;;	PRINT , "Error_status : ", Error_status
 	IF (Error_status NE 0) THEN BEGIN
-		PRINT , "compute_attributes() fails, dataset service at ",service," is not available."
+		PRINT , "dataset::compute_attributes() fails, dataset service at ",service," is not available."
 		OBJ_DESTROY, oUrl
 		CATCH, /CANCEL
 		MESSAGE, /REISSUE_LAST
@@ -130,6 +130,15 @@ function dataset::get_status
 	if self.status ne '' then value=self.status
 	return,value
 end
+
+function dataset::get_fields_struct
+	compile_opt idl2
+
+	value=''
+	if self.fields_struct ne '' then value=self.fields_struct
+	return,value
+end
+
 
 function dataset::search,query_list,output_list,sort_list,limit_request=limit_request_value, limit_to_nb_res_max=limit_to_nb_res_max_value
 	compile_opt idl2
