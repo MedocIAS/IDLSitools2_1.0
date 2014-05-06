@@ -33,20 +33,14 @@ function  media_search, DATES=dates_value,WAVES=waves_list,CADENCE=cadence_list,
 	IF (Error_status NE 0) THEN BEGIN
 ; Get the properties that will tell us more about the error.
 ;;		oUrl->GetProperty, RESPONSE_CODE=rspCode, RESPONSE_HEADER=rspHdr, RESPONSE_FILENAME=rspFn
-		PRINT , "media_search() fails creating sdo_dataset object, retry in progress ..."
+		PRINT , "media_search() fails creating sdo_dataset object, please retry later. Contact medoc-contact@ias.u-psd.fr if the problem persists."
 		CATCH, /CANCEL
-		CATCH, Error_status
-		IF (Error_status NE 0) THEN BEGIN
-			PRINT , "media_search() fails twice, please retry later. Contact medoc-contact@ias.u-psd.fr if the problem persists."
-			CATCH, /CANCEL
-		ENDIF ELSE BEGIN
-			sdo_dataset=obj_new('sdoIasDataset')
-		ENDELSE
 ;;		MESSAGE, /REISSUE_LAST
 	ENDIF ELSE BEGIN
 		sdo_dataset=obj_new('sdoIasDataset')
 		PRINT, "Loading MEDIA Sitools2 client : ",sdo_dataset->get_sitools2_url()
 		fields_list=(sdo_dataset->get_attributes()).FIELDS_LIST
+;;		FOREACH field, fields_list DO PRINT, field->get_name()
 		dates_param=LIST([fields_list[4]],DATES,'DATE_BETWEEN')
 		waves_param=LIST([fields_list[5]],WAVES,'IN')
 	;;	PRINT , "Cadence : " , CADENCE , "allowed_cadence['1 min '] : ",allowed_cadence['1 min']
@@ -69,11 +63,11 @@ function  media_search, DATES=dates_value,WAVES=waves_list,CADENCE=cadence_list,
 		;; Error hanlder def
 		CATCH, Error_status
 	 	IF Error_status NE 0 THEN BEGIN
-			PRINT, "media_search() fails performing sdo_dataset_search, retry in proress..."
+			PRINT, "media_search() fails performing sdo_dataset_search, please retry later. Contact medoc-contact@ias.u-psd.fr if the problem persists."
 			CATCH, /CANCEL
 			CATCH, Error_status
 			IF (Error_status NE 0) THEN BEGIN
-				PRINT , "media_search() fails twice, please retry later. Contact medoc-contact@ias.u-psd.fr if the problem persists."
+				PRINT , "media_search() fails twice, "
 				CATCH, /CANCEL
 			ENDIF ELSE BEGIN
 				results=sdo_dataset->search(query_list, output_options, sort_options, limit_to_nb_res_max=NB_RES_MAX)
