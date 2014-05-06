@@ -26,7 +26,7 @@ function sdoaiadataset::get_aia_dataset_uri
 	return,value
 	
 end
-
+	
 pro sdoaiadataset__define
 	compile_opt idl2
 
