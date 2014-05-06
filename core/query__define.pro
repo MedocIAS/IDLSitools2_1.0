@@ -15,6 +15,13 @@ end
 pro query::compute_attributes,param_list
 	compile_opt idl2
 
+  	CATCH, Error_status
+	IF (Error_status NE 0) THEN BEGIN
+		PRINT , "query::compute_attributes() fails."
+		OBJ_DESTROY, oUrl
+		CATCH, /CANCEL
+		MESSAGE, /REISSUE_LAST
+	ENDIF 
 	self.fields_list=LIST(param_list[0], /EXTRACT)
 	self.value_list=LIST(param_list[1], /EXTRACT)
 	FOREACH element,self.value_list DO BEGIN
@@ -28,7 +35,8 @@ pro query::compute_attributes,param_list
 		self.name_list_str+=element->get_name()+" "
 	ENDFOREACH
 	self.name_list_str=STRTRIM(self.name_list_str,2 )
-END
+	return
+end
 
 function query::get_fields_list
 	compile_opt idl2
