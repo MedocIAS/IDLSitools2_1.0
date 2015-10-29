@@ -21,7 +21,7 @@ pro sdodata::compute_attributes,data
 	self.sunum=data['sunum']
 	self.date_obs=data['date__obs']
 	self.wave=data['wavelnth']
-	self.ias_location=data['ias_location']
+	IF (data.keys()).WHERE('ias_location') EQ !NULL THEN self.ias_location='' ELSE self.ias_location=data['ias_location']
 	self.exptime=data['exptime']
 	self.t_rec_index=data['t_rec_index']
 end
@@ -121,7 +121,7 @@ function sdodata::get_file, DECOMPRESS=decompress_value, FILENAME=filename_value
 	oUrl_get.SetProperty, url_scheme='http'
 	oUrl_get.SetProperty, URL_HOST=url
 	file=oUrl_get.Get(FILENAME=FILENAME)
-	IF NOT QUIET THEN PRINT,"Downloading " +FILENAME+"..."
+	IF NOT QUIET AND self.ias_location NE '' THEN PRINT,"Downloading " +FILENAME+"..." ELSE PRINT,"No data at IAS for recnum : "+ STRTRIM(self.recnum)
 	OBJ_DESTROY, oUrl_get
 	return , file
 end 

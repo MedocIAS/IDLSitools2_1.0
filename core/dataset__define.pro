@@ -242,7 +242,9 @@ function dataset::search,query_list,output_list,sort_list,limit_request=limit_re
 	url_col_Model=key_col_Model+"="+value_col_Model
 
 	url_count=self.url+"/count"+'?'+url_kwargs+"&"+url_sort+"&"+url_col_Model;;Build url just for count
+;;	PRINT, url_count
 	url=self.url+"/records"+'?'+url_kwargs+"&"+url_sort+"&"+url_col_Model;;Build url for the request
+;;	PRINT, url
 	oUrl=OBJ_NEW('IDLnetUrl')
 	oUrl.SetProperty, url_scheme='http'
 	oUrl.SetProperty, URL_HOST=url_count
@@ -309,6 +311,8 @@ function dataset::search,query_list,output_list,sort_list,limit_request=limit_re
 		ENDWHILE
  		OBJ_DESTROY, oUrl
 	ENDIF
+;;	help, results
+;;	print, results
 	return, results
 end 
 
