@@ -83,7 +83,7 @@ function  media_search, DATES=dates_value,WAVES=waves_list,CADENCE=cadence_list,
 			sdo_data_list=LIST()
 			IF n_elements(results) NE 0 THEN BEGIN
 				FOREACH data_item, results DO BEGIN
-					PRINT, JSON_SERIALIZE(data_item)
+					;;PRINT, JSON_SERIALIZE(data_item)
 					sdo_data_list.Add, obj_new('sdoData',data_item)
 					;;PRINT , "Done "
 				ENDFOREACH
