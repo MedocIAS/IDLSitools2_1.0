@@ -11,7 +11,7 @@ The IDLSitools2 routines allow you to interrogate Sitools2 server especially MED
 
 ### Getting the sources
 
-	$ git clone https://github.com/SITools2/IDLSitools2_1.0.git IDLSitools2_1.0
+	$ git clone https://github.com/MedocIAS/IDLSitools2_1.0.git IDLSitools2_1.0
 	
         The retrieved module structure is the following:
             LICENCE
@@ -45,7 +45,7 @@ The IDLSitools2 routines allow you to interrogate Sitools2 server especially MED
 ## Installing the module
 	- Download the last archive file using the buttons above.
 	NB: Use the following command for a linux server :
-     	$ git clone https://github.com/PabloIAS/IDLSitools2_1.0.git IDLSitools2_1.0  (git required)
+     	$ git clone https://github.com/MedocIAS/IDLSitools2_1.0.git IDLSitools2_1.0  (git required)
 
 	or 
         - Download the last archive file 
