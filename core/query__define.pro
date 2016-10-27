@@ -21,20 +21,29 @@ pro query::compute_attributes,param_list
 		OBJ_DESTROY, oUrl
 		CATCH, /CANCEL
 		MESSAGE, /REISSUE_LAST
-	ENDIF 
-	self.fields_list=LIST(param_list[0], /EXTRACT)
-	self.value_list=LIST(param_list[1], /EXTRACT)
-	FOREACH element,self.value_list DO BEGIN
-		self.value_list_str+=STRCOMPRESS(element, /REMOVE_ALL)+" " 
-	ENDFOREACH
-	self.value_list_str=STRTRIM(self.value_list_str,2 )
-	self.operation=param_list[2]
+	ENDIF ELSE BEGIN 
+		self.fields_list=LIST(param_list[0], /EXTRACT)
+;		PRINT , "fields_list : ", self.fields_list
+		self.value_list=LIST(param_list[1], /EXTRACT)
+;		PRINT , "value_list : ", self.value_list
+		FOREACH element,self.value_list DO BEGIN
+;			PRINT , "element : ",element
+;			PRINT ,"STRCOMPRESS element : ",STRCOMPRESS(element, /REMOVE_ALL)
+			self.value_list_str+=STRCOMPRESS(element, /REMOVE_ALL)+" " 
+		ENDFOREACH
+;		PRINT , "self.value_list_str", self.value_list_str
 
-	FOREACH element, self.fields_list DO BEGIN
-		self.name_list.Add ,element->get_name()
-		self.name_list_str+=element->get_name()+" "
-	ENDFOREACH
-	self.name_list_str=STRTRIM(self.name_list_str,2 )
+		self.value_list_str=STRTRIM(self.value_list_str,2 )
+;		PRINT , "self.value_list_str : ",self.value_list_str
+		self.operation=param_list[2]
+;		PRINT, "operation : ",self.operation
+
+		FOREACH element, self.fields_list DO BEGIN
+			self.name_list.Add ,element->get_name()
+			self.name_list_str+=element->get_name()+" "
+		ENDFOREACH
+		self.name_list_str=STRTRIM(self.name_list_str,2 )
+	ENDELSE
 	return
 end
 
