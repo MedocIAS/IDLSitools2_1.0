@@ -25,19 +25,25 @@ pro dataset::compute_attributes,url
 	compile_opt idl2
 	
 	self.uri="/"+(strsplit(url,"/",/EXTRACT))[-1]
+;	PRINT, "uri : ", self.uri
 	service=(strsplit(url,"/",/EXTRACT))[0]
+;	PRINT, "service : ",service
 	self.url=url
+;	PRINT, "url : ",self.url
 	str_url=self.url+'?media=json'
+;	PRINT, "json_url : ",str_url
 	oUrl=OBJ_NEW('IDLnetUrl')
 	oUrl.SetProperty, url_scheme='http'
 	oUrl.SetProperty, URL_HOST=str_url
+;	HELP, oUrl
 ; If the url object throws an error it will be caught here
 ; Get the properties that will tell us more about the error.
-;	oUrl->GetProperty, RESPONSE_CODE=rspCode, RESPONSE_HEADER=rspHdr, RESPONSE_FILENAME=rspFn
+	oUrl->GetProperty, RESPONSE_CODE=rspCode, RESPONSE_HEADER=rspHdr, RESPONSE_FILENAME=rspFn
 ;	PRINT ,"rspCode : ",rspCode
 ;	PRINT ,"rspHdr : ",rspHdr
+;	PRINT ,"rspFn : ",rspFn
    	CATCH, Error_status
-;;	PRINT , "Error_status : ", Error_status
+;	PRINT , "Error_status : ", Error_status
 	IF (Error_status NE 0) THEN BEGIN
 		PRINT , "dataset::compute_attributes() fails, dataset service at ",service," is not available."
 		OBJ_DESTROY, oUrl
@@ -47,18 +53,18 @@ pro dataset::compute_attributes,url
 		json = oUrl.Get(/STRING_ARRAY)
 		json_result=JSON_PARSE(STRJOIN(json))
 		result=json_result['dataset']
-	;;	PRINT, JSON_SERIALIZE(result)
+;;		PRINT, JSON_SERIALIZE(result)
 		self.name=result['name']
 		self.description=result['description']
 		self.status=result['status']
 		columns=result['columnModel']
-	;;	PRINT, JSON_SERIALIZE(columns)
+;		PRINT, JSON_SERIALIZE(columns)
 		FOR i=0, n_elements(columns)-1 DO BEGIN 
 			IF  TYPENAME(columns[i])  eq 'HASH' THEN BEGIN
 				key= (columns[i])['columnAlias']
-	;;			PRINT, key
+;				PRINT, key
 				field=obj_new('field',columns[i])
-	;;			PRINT, field
+;				PRINT, field
 				self.fields_list.Add,field
 				self.fields_struct+=HASH(key,field)
 				IF columns[i].haskey('filter') THEN BEGIN 
@@ -131,6 +137,14 @@ function dataset::get_status
 	return,value
 end
 
+function dataset::get_fields_list
+	compile_opt idl2
+
+	value=''
+	if self.fields_list ne '' then value=self.fields_list
+	return,value
+end
+
 function dataset::get_fields_struct
 	compile_opt idl2
 
@@ -154,6 +168,7 @@ function dataset::search,query_list,output_list,sort_list,limit_request=limit_re
 	allowed_operation =LIST('DATE_BETWEEN','NUMERIC_BETWEEN', 'CADENCE')
 	FOREACH query,query_list DO BEGIN
 		operation=STRUPCASE(query->get_operation())
+;		PRINT , "Operation : ",operation
 		IF operation EQ 'GE' THEN operation='GTE' ELSE $
 		IF operation EQ 'LE' THEN operation='LTE'
 		IF allowed_comp_operation.WHERE(operation) NE !NULL THEN BEGIN
@@ -173,34 +188,49 @@ function dataset::search,query_list,output_list,sort_list,limit_request=limit_re
 		ENDIF ELSE IF operation EQ 'LIKE' THEN BEGIN
 			operation='TEXT'
 			i+=1
+;			PRINT, "increment : ", i 
 		ENDIF ELSE IF operation EQ 'IN' THEN BEGIN 
+;			PRINT, "Inside IN condition"
 			operation='LISTBOXMULTIPLE'
+;			PRINT, "operation : ",operation
 			key='p['+STRCOMPRESS(i, /REMOVE_ALL)+']'
+;			PRINT , "key : ",key
 			value= operation+"|"+STRJOIN(STRSPLIT(query->get_name_list_str(), /EXTRACT),"|")+"|"+STRJOIN(STRSPLIT(query->get_value_list_str(), /EXTRACT),"|")
+;			PRINT , "value : ",value 
 			query_hash+=HASH(key,value)
+;			PRINT , "query_hash: ",query_hash
 			i+=1
+;			PRINT, "increment : ", i 
 		ENDIF ELSE IF allowed_operation.WHERE(operation) NE !NULL THEN BEGIN
 			key='p['+STRCOMPRESS(i, /REMOVE_ALL)+']'
 			value= operation+"|"+STRJOIN(STRSPLIT(query->get_name_list_str(), /EXTRACT),"|")+"|"+STRJOIN(STRSPLIT(query->get_value_list_str(), /EXTRACT),"|")
 			query_hash+=HASH(key,value)
 			i+=1
+;			PRINT, "increment : ", i 
 		ENDIF ELSE BEGIN
-			print,'Operation not allowed'	
+;			print,'dataset::search() Operation not allowed'	
 		ENDELSE	
+;		PRINT ,"query hash is at final : ",query_hash
 	ENDFOREACH
 
 	output_name_list=LIST()
 	output_name_dict=HASH()
+;	PRINT ,"output_list : ",output_list
+
 	FOREACH field,output_list DO BEGIN
 		output_name_list.Add, field->get_name()
 		key=field->get_name()
 		value=field
 		output_name_dict+=HASH(key,value)
 	ENDFOREACH
+;	PRINT ,"output_name_list : ", JSON_SERIALIZE(output_name_list)
+
 	out_name_list_str="" 
 	FOREACH output, output_name_list DO BEGIN
+;		PRINT, "output : ",output
 		out_name_list_str+=output+" "
 	ENDFOREACH
+;	PRINT ,"output_name_list_str : ", out_name_list_str
 
 	sort_dict_list=LIST()
 	FOREACH sort_request,sort_list DO BEGIN	
@@ -242,15 +272,19 @@ function dataset::search,query_list,output_list,sort_list,limit_request=limit_re
 	url_col_Model=key_col_Model+"="+value_col_Model
 
 	url_count=self.url+"/count"+'?'+url_kwargs+"&"+url_sort+"&"+url_col_Model;;Build url just for count
-;;	PRINT, url_count
+;	PRINT, "url count : ",url_count
 	url=self.url+"/records"+'?'+url_kwargs+"&"+url_sort+"&"+url_col_Model;;Build url for the request
-;;	PRINT, url
+;	PRINT, "url records : ",url
 	oUrl=OBJ_NEW('IDLnetUrl')
 	oUrl.SetProperty, url_scheme='http'
 	oUrl.SetProperty, URL_HOST=url_count
 	json = oUrl.Get(/STRING_ARRAY)
 	json_result=JSON_PARSE(STRJOIN(json))
 	nbr_results= json_result['total']
+;	PRINT , "nbr results : ", nbr_results
+;	PRINT , "nbr limit_request : ", limit_request
+;	PRINT , "limit_to_nb_res_max : ",limit_to_nb_res_max
+;	PRINT , "limit query_hash : ",query_hash['limit']
 	OBJ_DESTROY, oUrl
 	results=LIST() 
 	IF (nbr_results LT limit_request) THEN BEGIN;;Check if the request does not exceed 350 000 items 
@@ -266,7 +300,7 @@ function dataset::search,query_list,output_list,sort_list,limit_request=limit_re
 			url_kwargs=STRJOIN(STRSPLIT(url_kwargs, /EXTRACT),"&")
 			url=self.url+"/records"+'?'+url_kwargs+"&"+url_sort+"&"+url_col_Model
 		ENDIF ELSE IF (limit_to_nb_res_max GT 0 ) &&  (limit_to_nb_res_max GE query_hash['limit']) THEN BEGIN
-			PRINT ,"limit of results specified and more than 300"
+;			PRINT ,"limit of results specified and more than 300"
 			nbr_results=limit_to_nb_res_max
 			query_hash+=HASH('nocount','true')
 			url_kwargs=''
@@ -276,9 +310,11 @@ function dataset::search,query_list,output_list,sort_list,limit_request=limit_re
 			url_kwargs=STRTRIM(url_kwargs,2 )
 			url_kwargs=STRJOIN(STRSPLIT(url_kwargs, /EXTRACT),"&")
 			url=self.url+"/records"+'?'+url_kwargs+"&"+url_sort+"&"+url_col_Model
+;			PRINT , "url no count :", url
 		ENDIF
 		oUrl=OBJ_NEW('IDLnetUrl')
 		oUrl.SetProperty, url_scheme='http'
+;		PRINT , "limit query_hash['start'] : ",query_hash['start']
 		WHILE (nbr_results -query_hash['start']) GT 0 DO BEGIN
 			oUrl.SetProperty, URL_HOST=url
 			json = oUrl.Get(/STRING_ARRAY)
@@ -301,6 +337,7 @@ function dataset::search,query_list,output_list,sort_list,limit_request=limit_re
 			ENDFOREACH
 			
 			query_hash['start']+= query_hash['limit'];;increment the job by the kwargs limit given (by design)
+;			PRINT , "limit query_hash['start'] +increment : ",query_hash['start']
 			url_kwargs=''
 			FOREACH value,query_hash,key DO BEGIN 
 				url_kwargs+=key+'='+STRTRIM(STRING(value),2)+" "
@@ -308,11 +345,13 @@ function dataset::search,query_list,output_list,sort_list,limit_request=limit_re
 			url_kwargs=STRTRIM(url_kwargs,2 )
 			url_kwargs=STRJOIN(STRSPLIT(url_kwargs, /EXTRACT),"&")
 			url=self.url+"/records"+'?'+url_kwargs+"&"+url_sort+"&"+url_col_Model;; build new url for request
+;			PRINT , "next url no count :", url
+;			PRINT ,"while condition : ", nbr_results -query_hash['start']
 		ENDWHILE
  		OBJ_DESTROY, oUrl
 	ENDIF
-;;	help, results
-;;	print, results
+;	help, results
+;	PRINT, JSON_SERIALIZE(results)
 	return, results
 end 
 
@@ -342,6 +381,7 @@ pro dataset::resources_list
 
 	service=(strsplit(self.url,"/",/EXTRACT))[0]
 	url=self.url+"/services?media=json"
+;	PRINT , "url : ",url
 	oUrl=OBJ_NEW('IDLnetUrl')
 	oUrl.SetProperty, url_scheme='http'
 	oUrl.SetProperty, URL_HOST=url
@@ -358,19 +398,24 @@ pro dataset::resources_list
 	ENDIF ELSE BEGIN	
 		json = oUrl.Get(/STRING_ARRAY)
 		json_result=JSON_PARSE(STRJOIN(json))
-		data_result=json_result['data']
-		FOREACH data_item, data_result DO BEGIN
-			IF  TYPENAME(data_item)  eq 'HASH' THEN BEGIN 
-				parameters_data=data_item['parameters']
-				FOREACH param, parameters_data DO BEGIN 
-					IF TYPENAME(parameters_data) eq 'HASH'THEN BEGIN 
-						IF param['name'] EQ 'url' THEN BEGIN
-							self.resources_list.Add, self.url+param['value']
-						ENDIF
-					ENDIF 
-				ENDFOREACH
-			ENDIF 
-		ENDFOREACH
+;		PRINT ,"json_result : ", JSON_SERIALIZE(json_result)
+
+		IF (json_result.keys()).WHERE('data') NE !NULL THEN BEGIN 
+			data_result=json_result['data']
+;			PRINT ,"data_result : ",JSON_SERIALIZE(data_result)
+			FOREACH data_item, data_result DO BEGIN
+				IF  TYPENAME(data_item)  eq 'HASH' THEN BEGIN 
+					parameters_data=data_item['parameters']
+					FOREACH param, parameters_data DO BEGIN 
+						IF TYPENAME(parameters_data) eq 'HASH'THEN BEGIN 
+							IF param['name'] EQ 'url' THEN BEGIN
+								self.resources_list.Add, self.url+param['value']
+							ENDIF
+						ENDIF 
+					ENDFOREACH
+				ENDIF
+			ENDFOREACH
+		ENDIF 
 		OBJ_DESTROY, oUrl
 		return
 	ENDELSE
