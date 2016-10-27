@@ -1,9 +1,9 @@
 
-function  sdoiasdataset::init
+function  sdoiasdataset::init,sitools_url,dataset_uri
 	compile_opt idl2
 
-	self.sitools2_url="medoc-sdo.ias.u-psud.fr"	
-	self.sdo_dataset_uri="/webs_IAS_SDO_dataset"
+	IF n_elements(sitools_url) EQ 0 THEN self.sitools_url='medoc-sdo.ias.u-psud.fr' ELSE self.sitools2_url=sitools_url
+	IF n_elements(dataset_uri) EQ 0 THEN self.sdo_dataset_uri='/webs_IAS_SDO_dataset' ELSE self.sdo_dataset_uri=dataset_uri
 	sdo_url=self.sitools2_url+self.sdo_dataset_uri
 	sdo_dataset_code=self->dataset::init(sdo_url)
 	
