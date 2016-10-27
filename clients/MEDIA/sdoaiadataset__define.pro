@@ -1,9 +1,10 @@
 
-function  sdoaiadataset::init
+function  sdoaiadataset::init, server_name, aia_dataset_uri
 	compile_opt idl2
-	self.sitools2_url="medoc-sdo.ias.u-psud.fr"
-	self.aia_dataset_uri="/webs_aia_dataset"
-	aia_url=self.sitools2_url+self.aia_dataset_uri
+	self.sitools2_url=server_name
+	self.aia_dataset_uri=aia_dataset_uri
+	aia_url=self.sitools2_url+"/"+self.aia_dataset_uri
+;;	PRINT , "aia_url: ", aia_url
 	aia_dataset_code=self->dataset::init(aia_url)
 	
 	return,aia_dataset_code
