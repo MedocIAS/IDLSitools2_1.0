@@ -5,6 +5,7 @@ function  metadata_search, KEYWORDS=keywords_list, RECNUM_LIST=recnum_list, SERI
 	IF n_elements(keywords_list) EQ 0 THEN message," Error metadata_search(): keywords must be specified" ELSE KEYWORDS=keywords_list
 	IF n_elements(recnum_list) EQ 0 THEN  MESSAGE, "RECNUM_LIST param should be provided" ELSE RECNUM_LIST=recnum_list
 	IF n_elements(serie_name) EQ 0 THEN serie_name='aia.lev1'
+	IF n_elements(server_name) EQ 0 THEN server_name='medoc-sdo.ias.u-psud.fr'
 	;PRINT , N_ELEMENTS(RECNUM_LIST)
 
 	dataset_uri=''
