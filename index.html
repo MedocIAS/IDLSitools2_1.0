@@ -82,6 +82,12 @@ NB: Use the following command for a linux server :
 
     $ sdo_list=media_search( DATES=LIST('2011-01-01T00:00','2011-01-01T00:05') , WAVES=LIST('304','193') , CADENCE=LIST('1 min'),  NB_RES_MAX=10)
 
+    for hmi data 
+
+    $ sdo_list=media_search( DATES=LIST('2016-06-01T00:00:00','2016-06-02T01:00:00') , SERIE='hmi.m_720s_nrt' ,CADENCE=LIST('12 min'), NB_RES_MAX=10)
+
+- Print the result :
+    $ FOREACH result, sdo_list DO PRINT,  result->get_attributes()
 
 - Simply download the result of your previous search() calling the media_get() function.
 
@@ -93,6 +99,12 @@ NB: Use the following command for a linux server :
         meta_data_search=sdo_item-&gt;metadata_search(KEYWORDS=LIST('quality','cdelt1','cdelt2'))
         PRINT, JSON_SERIALIZE(meta_data_search)
       ENDFOREACH
+
+or build a list of recnum and only make one request :
+
+    $ recnum_list=LIST()
+    $ FOREACH result, sdo_list DO recnum_list.Add, result->get_recnum() 
+    $ meta_list=metadata_search(KEYWORDS=LIST('date__obs','quality','cdelt1','cdelt2'), RECNUM_LIST=recnum_list , SERVER_NAME='idoc-solar-portal-test.ias.u-psud.fr')
 
 - Filter on a specific keyword before download data using the get_file() method.
 
