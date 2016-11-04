@@ -17,8 +17,8 @@ function  metadata_search, KEYWORDS=keywords_list, RECNUM_LIST=recnum_list, SERI
 		dataset_uri="webs_"+serie_name+"_dataset"
 		;dataset_uri=serie_name
 	ENDIF 
-	PRINT , "SERVER_NAME : ", server_name
-	PRINT , "dataset_uri : ", dataset_uri
+	;PRINT , "SERVER_NAME : ", server_name
+	;PRINT , "dataset_uri : ", dataset_uri
 
 	ds_aia_lev1=obj_new('sdoaiadataset', SERVER_NAME, dataset_uri)
 	;#Build Query
@@ -28,9 +28,9 @@ function  metadata_search, KEYWORDS=keywords_list, RECNUM_LIST=recnum_list, SERI
 ;	param_query_aia=LIST(fields_list[0],RECNUM_LIST,'IN')
 	param_query_aia=LIST(fields_struct['recnum'],recnum_list,'IN')
 
-	PRINT ,"param_query_aia", param_query_aia
+	;PRINT ,"param_query_aia", param_query_aia
 	Q_aia=obj_new('query',param_query_aia)
-	PRINT, "query : ", Q_aia
+	;PRINT, "query : ", Q_aia
 	O1_aia=LIST()
 	FOREACH key, KEYWORDS DO BEGIN
 		IF (ds_aia_lev1->get_fields_struct()).HasKey(key) THEN O1_aia.Add,(ds_aia_lev1->get_fields_struct())[key] ELSE message,"Error metadata_search(): keyword does not exist" 
