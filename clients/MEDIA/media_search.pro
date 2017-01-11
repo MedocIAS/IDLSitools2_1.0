@@ -5,6 +5,7 @@ function  media_search, DATES=dates_value,WAVES=waves_list,SERIES=series_name_va
 	;#Define server 
 	sitools2_url='idoc-solar-portal-test.ias.u-psud.fr'
 ;;	sitools2_url='medoc-sdo.ias.u-psud.fr'
+;;	toto for Clara 
 
 	IF n_elements(dates_value) EQ 0 THEN MESSAGE, "Provide dates please" ELSE DATES=dates_value
 	IF n_elements(waves_list) EQ 0 THEN WAVES=LIST('94','131','171','193','211','304','335','1600','1700') ELSE WAVES=waves_list
