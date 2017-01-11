@@ -80,7 +80,7 @@ NB: Use the following command for a linux server :
 
 <pre><code>- Make a request using the media_search() function.
 
-    $ sdo_list=media_search( DATES=LIST('2011-01-01T00:00','2011-01-01T00:05') , WAVES=LIST('304','193') , CADENCE=LIST('1 min'),  NB_RES_MAX=10)
+    $ sdo_list=media_search( DATES=LIST('2011-01-01T00:00:00','2011-01-01T00:05:00') , WAVES=LIST('304','193') , CADENCE=LIST('1 min'),  NB_RES_MAX=10)
 
     for hmi data 
 
@@ -122,7 +122,7 @@ $ FOREACH sdo_item, sdo_list DO BEGIN
 
 <pre><code>- Make a request using the gaia_search() function.
 
-    $ gaia_list=gaia_search( DATES=LIST('2011-01-01T00:00','2011-01-01T23:05'),  NB_RES_MAX=10)
+    $ gaia_list=gaia_search( DATES=LIST('2011-01-01T00:00:00','2011-01-01T23:05:00'),  NB_RES_MAX=10)
 
 - Simply download the result of your previous search() calling the gaia_get() function.
 
