@@ -5,7 +5,6 @@ function  media_search, DATES=dates_value,WAVES=waves_list,SERIES=series_name_va
 	;#Define server 
 	sitools2_url='idoc-solar-portal-test.ias.u-psud.fr'
 ;;	sitools2_url='medoc-sdo.ias.u-psud.fr'
-;;	toto for Clara 
 
 	IF n_elements(dates_value) EQ 0 THEN MESSAGE, "Provide dates please" ELSE DATES=dates_value
 	IF n_elements(waves_list) EQ 0 THEN WAVES=LIST('94','131','171','193','211','304','335','1600','1700') ELSE WAVES=waves_list
@@ -78,20 +77,23 @@ function  media_search, DATES=dates_value,WAVES=waves_list,SERIES=series_name_va
 	IF (Error_status NE 0) THEN BEGIN
 ; Get the properties that will tell us more about the error.
 ;;		oUrl->GetProperty, RESPONSE_CODE=rspCode, RESPONSE_HEADER=rspHdr, RESPONSE_FILENAME=rspFn
-		PRINT , "media_search() fails creating sdo_dataset object, please retry later. Contact medoc-contact@ias.u-psud.fr if the problem persists."
+		PRINT , "media_search() fails, please retry later. Contact medoc-contact@ias.u-psud.fr if the problem persists."
 		CATCH, /CANCEL
-;;		MESSAGE, /REISSUE_LAST
+		MESSAGE, /REISSUE_LAST
 	ENDIF ELSE BEGIN
-		sdo_dataset=obj_new('sdoIasDataset',sitools2_url,dataset_uri )
+		sdo_dataset=obj_new('sdoiasdataset',sitools2_url,dataset_uri )
 		PRINT, "Loading MEDIA Sitools2 client : ",sdo_dataset->get_sitools2_url()
 		fields_list=(sdo_dataset->get_attributes()).FIELDS_LIST
-;		PRINT, fields_list
-;		FOREACH field, fields_list DO PRINT, field->get_name()
+		IF n_elements(fields_list) EQ 0 THEN MESSAGE, "sdo_dataset->get_attributes() has return 0 elements."
+;;		PRINT , "Nbr elements :", n_elements(fields_list)
+;;		PRINT, "fields_list : ", fields_list
+;;		FOREACH field, fields_list DO PRINT, field->get_name()
 		fields_struct=sdo_dataset->get_fields_struct()
-;		PRINT, fields_struct
+;;		PRINT, fields_struct
+;;		PRINT, "fields_struct['date__obs'] : ", fields_struct['date__obs']
 		;dates_param=LIST([fields_list[4]],DATES,'DATE_BETWEEN')
 		dates_param=LIST([fields_struct['date__obs']],DATE_OPTIM,'DATE_BETWEEN')
-;		PRINT ,"Date_param : ", dates_param
+;;		PRINT ,"Date_param : ", dates_param
 ;		waves_param=LIST([fields_list[5]],WAVES,'IN')
 		waves_param=LIST([fields_struct['wavelnth']],WAVES,'IN')
 ;		PRINT , "Waves param : ", waves_param
