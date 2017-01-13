@@ -58,13 +58,13 @@ pro dataset::compute_attributes,url
 		self.description=result['description']
 		self.status=result['status']
 		columns=result['columnModel']
-;		PRINT, JSON_SERIALIZE(columns)
+;;		PRINT, JSON_SERIALIZE(columns)
 		FOR i=0, n_elements(columns)-1 DO BEGIN 
-			IF  TYPENAME(columns[i])  eq 'HASH' THEN BEGIN
+			IF  TYPENAME(columns[i])  eq 'HASH' OR TYPENAME(columns[i])  eq 'ORDEREDHASH' THEN BEGIN
 				key= (columns[i])['columnAlias']
-;				PRINT, key
+;;				PRINT, key
 				field=obj_new('field',columns[i])
-;				PRINT, field
+;;				PRINT, field
 				self.fields_list.Add,field
 				self.fields_struct+=HASH(key,field)
 				IF columns[i].haskey('filter') THEN BEGIN 
