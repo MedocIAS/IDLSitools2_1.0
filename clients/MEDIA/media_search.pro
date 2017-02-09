@@ -3,7 +3,8 @@ function  media_search, DATES=dates_value,WAVES=waves_list,SERIES=series_name_va
 	compile_opt idl2
 	
 	;#Define server 
-	sitools2_url='idoc-solar-portal-test.ias.u-psud.fr'
+;;	sitools2_url='idoc-solar-portal-test.ias.u-psud.fr'
+	sitools2_url='idoc-medoc-test.ias.u-psud.fr'
 ;;	sitools2_url='medoc-sdo.ias.u-psud.fr'
 
 	IF n_elements(dates_value) EQ 0 THEN MESSAGE, "Provide dates please" ELSE DATES=dates_value
@@ -39,9 +40,9 @@ function  media_search, DATES=dates_value,WAVES=waves_list,SERIES=series_name_va
 		WAVES=WAVES_STRING
 	ENDIF
 	IF STRMID(SERIES,0,3) EQ 'aia' AND (allowed_cadence_aia.keys()).WHERE(CADENCE[0]) EQ !NULL THEN BEGIN
-		MESSAGE, "Cadence should be in list '12 sec','1 min', '2 min', '10 min ', '30 min', '1 h', '2 h', '6 h', '12 h', '1 day' or you can use shortcuts as '12s', '1m', '2h' or '1d'"
+		MESSAGE, "Cadence should be in list '12 sec','1 min', '2 min', '10 min', '30 min', '1 h', '2 h', '6 h', '12 h', '1 day' or you can use shortcuts as '12s', '1m', '2h' or '1d'"
 	ENDIF ELSE IF STRMID(SERIES,0,3) EQ 'hmi' AND (allowed_cadence_hmi.keys()).WHERE(CADENCE[0]) EQ !NULL THEN BEGIN
-		MESSAGE, "Cadence should be in list '12 min ', '1 h', '2 h', '6 h', '12 h', '1 day' or you can use shortcuts as '12m', '1h', '2h', '6h','12h' or '1d'"
+		MESSAGE, "Cadence should be in list '12 min', '1 h', '2 h', '6 h', '12 h', '1 day' or you can use shortcuts as '12m', '1h', '2h', '6h','12h' or '1d'"
 	ENDIF
 	FOREACH wave,WAVES DO BEGIN 
 		IF allowed_waves.WHERE(wave) EQ !NULL THEN MESSAGE, "Waves not allowed, it should be in list '94','131','171','193','211','304','335','1600','1700'"
@@ -67,9 +68,9 @@ function  media_search, DATES=dates_value,WAVES=waves_list,SERIES=series_name_va
 	dataset_uri=''
 		IF STRMID(sitools2_url,0,9) EQ 'medoc-sdo' THEN BEGIN
 		dataset_uri='/webs_IAS_SDO_dataset'
-	ENDIF ELSE IF sitools2_url EQ 'idoc-solar-portal-test.ias.u-psud.fr' AND STRMID(SERIES,0,3) EQ 'hmi' THEN BEGIN
+	ENDIF ELSE IF STRMID(sitools2_url,0,4) EQ 'idoc' AND STRMID(SERIES,0,3) EQ 'hmi' THEN BEGIN
 		dataset_uri='/webs_IAS_SDO_HMI_dataset'
-	ENDIF ELSE IF sitools2_url EQ 'idoc-solar-portal-test.ias.u-psud.fr' AND STRMID(SERIES,0,3) EQ 'aia' THEN BEGIN
+	ENDIF ELSE IF STRMID(sitools2_url,0,4) EQ 'idoc' AND STRMID(SERIES,0,3) EQ 'aia' THEN BEGIN
 		dataset_uri='/webs_IAS_SDO_AIA_dataset'
 	ENDIF
 
@@ -120,20 +121,20 @@ function  media_search, DATES=dates_value,WAVES=waves_list,SERIES=series_name_va
 ;;			MESSAGE, /REISSUE_LAST
 		ENDIF ELSE BEGIN
 			Q1=obj_new('query',dates_param)
-;			PRINT, Q1
-;			PRINT, Q1->get_value_list_str()
+;;			PRINT, Q1
+;;			PRINT, Q1->get_value_list_str()
 
 			Q2=obj_new('query',waves_param)
-;			PRINT, Q2
-;			PRINT, Q2->get_value_list_str()
+;;			PRINT, Q2
+;;			PRINT, Q2->get_value_list_str()
 
 			Q3=obj_new('query',cadence_param)
-;			PRINT, Q3
-;			PRINT, Q3->get_value_list_str()
+;;			PRINT, Q3
+;;			PRINT, Q3->get_value_list_str()
 
 			Q4=obj_new('query',serie_param)
-;			PRINT, Q4
-;			PRINT, Q4->get_value_list_str()
+;;			PRINT, Q4
+;;			PRINT, Q4->get_value_list_str()
 
 ;;			IF (allowed_12s_cadence.keys()).WHERE(CADENCE[0]) NE !NULL THEN query_list=LIST(Q1,Q2) ELSE query_list=LIST(Q1,Q2,Q3)
 			IF (allowed_12s_cadence.keys()).WHERE(CADENCE[0]) NE !NULL THEN query_list=LIST(Q1,Q2,Q4) ELSE query_list=LIST(Q1,Q2,Q3,Q4)
@@ -148,20 +149,21 @@ function  media_search, DATES=dates_value,WAVES=waves_list,SERIES=series_name_va
 			;;output_options=LIST(fields_list[0],fields_list[1],fields_list[2],fields_list[4],fields_list[5],fields_list[7],fields_list[8],fields_list[9])
 		ENDELSE
 
-		IF sitools2_url EQ 'idoc-solar-portal-test.ias.u-psud.fr' AND STRMID(SERIES,0,3) EQ 'aia' THEN BEGIN
+		IF STRMID(sitools2_url,0,4) EQ 'idoc' AND STRMID(SERIES,0,3) EQ 'aia' THEN BEGIN
 			output_options=LIST(fields_struct['get'],fields_struct['recnum'],fields_struct['sunum'],fields_struct['date__obs'],fields_struct['series_name'],$
 			fields_struct['wavelnth'],fields_struct['ias_location'],fields_struct['exptime'],fields_struct['t_rec_index'])
-		ENDIF ELSE IF sitools2_url EQ 'idoc-solar-portal-test.ias.u-psud.fr' AND STRMID(SERIES,0,9) EQ 'hmi.sharp' THEN BEGIN
+		ENDIF ELSE IF STRMID(sitools2_url,0,4) EQ 'idoc' AND STRMID(SERIES,0,9) EQ 'hmi.sharp' THEN BEGIN
 			output_options=LIST(fields_struct['recnum'],fields_struct['sunum'],fields_struct['date__obs'],fields_struct['series_name'],$
 			fields_struct['wavelnth'],fields_struct['ias_location'],fields_struct['exptime'],fields_struct['t_rec_index'],fields_struct['ias_path'],fields_struct['harpnum'] )
-		ENDIF ELSE IF sitools2_url EQ 'idoc-solar-portal-test.ias.u-psud.fr' AND STRMID(SERIES,0,3) EQ 'hmi' THEN BEGIN
+		ENDIF ELSE IF STRMID(sitools2_url,0,4) EQ 'idoc' AND STRMID(SERIES,0,3) EQ 'hmi' THEN BEGIN
 			output_options=LIST(fields_struct['recnum'],fields_struct['sunum'],fields_struct['date__obs'],fields_struct['series_name'],$
 			fields_struct['wavelnth'],fields_struct['ias_location'],fields_struct['exptime'],fields_struct['t_rec_index'],fields_struct['ias_path'])
 		ENDIF ELSE IF sitools2_url EQ 'medoc-sdo.ias.u-psud.fr' AND STRMID(SERIES,0,3) EQ 'aia' THEN BEGIN
 			output_options=LIST(fields_struct['get'],fields_struct['recnum'],fields_struct['sunum'],fields_struct['date__obs'],fields_struct['series_name'],$
 			fields_struct['wavelnth'],fields_struct['ias_location'],fields_struct['exptime'],fields_struct['t_rec_index'])
-		ENDIF
-		
+		ENDIF ELSE BEGIN
+			PRINT , "Output not defined"
+		ENDELSE
 		;PRINT ,"get :", fields_struct['get']
 ;		PRINT , "recnum :", fields_struct['recnum']
 ;		PRINT , "sunum :", fields_struct['sunum']

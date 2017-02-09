@@ -159,8 +159,8 @@ function sdodata::get_file, DECOMPRESS=decompress_value, FILENAME=filename_value
 	FILENAME_PRE=''
 	LIST_FILES=[]
 
-	PRINT, "n elements 4 filename_value :", n_elements(filename_value)
-	PRINT, "series_name : ",self.series_name 
+;	PRINT, "n elements 4 filename_value :", n_elements(filename_value)
+;	PRINT, "series_name : ",self.series_name 
 
 	;#Define prefix for output file 
 	IF n_elements(filename_value) EQ 0 AND STRMID(self.series_name,0,9) EQ 'hmi.sharp' THEN BEGIN 
@@ -173,7 +173,6 @@ function sdodata::get_file, DECOMPRESS=decompress_value, FILENAME=filename_value
 		FILENAME_PRE=self.series_name+"_"+STRCOMPRESS(self.wave, /REMOVE_ALL)+"A_"+self.date_obs+"."
 	ENDIF ELSE IF n_elements(filename_value) EQ 0 AND self.series_name EQ 'aia.lev1' THEN BEGIN
 		FILENAME_PRE=self.series_name+"_"+STRCOMPRESS(self.wave, /REMOVE_ALL)+"A_"+self.date_obs+"." 
-		PRINT, "Filename : ",FILENAME_PRE
 	ENDIF ELSE IF n_elements(filename_value) NE 0 THEN BEGIN
 		FILENAME_PRE=filename_value
 	ENDIF
@@ -212,8 +211,8 @@ function sdodata::get_file, DECOMPRESS=decompress_value, FILENAME=filename_value
 		ENDIF ELSE IF self.series_name EQ "aia.lev1" THEN BEGIN 
 			url=self.url
 		ENDIF
-		PRINT , FILENAME
-		PRINT, url
+;;		PRINT , FILENAME
+;;		PRINT, url
 
 		;#Retrieve data 	
 		oUrl_get=OBJ_NEW('IDLnetUrl')
