@@ -159,6 +159,9 @@ function sdodata::get_file, DECOMPRESS=decompress_value, FILENAME=filename_value
 	FILENAME_PRE=''
 	LIST_FILES=[]
 
+	PRINT, "n elements 4 filename_value :", n_elements(filename_value)
+	PRINT, "series_name : ",self.series_name 
+
 	;#Define prefix for output file 
 	IF n_elements(filename_value) EQ 0 AND STRMID(self.series_name,0,9) EQ 'hmi.sharp' THEN BEGIN 
 	;	PRINT ,"type series_name : ",TYPENAME(self.series_name)
@@ -169,7 +172,8 @@ function sdodata::get_file, DECOMPRESS=decompress_value, FILENAME=filename_value
 	ENDIF ELSE IF n_elements(filename_value) EQ 0 AND STRMID(self.series_name,0,3) EQ 'hmi' THEN BEGIN 
 		FILENAME_PRE=self.series_name+"_"+STRCOMPRESS(self.wave, /REMOVE_ALL)+"A_"+self.date_obs+"."
 	ENDIF ELSE IF n_elements(filename_value) EQ 0 AND self.series_name EQ 'aia.lev1' THEN BEGIN
-		FILENAME_PRE=self.series_name+"_"+STRCOMPRESS(self.wave, /REMOVE_ALL)+"A_"+self.date_obs+".image_lev1.fits"+"." 
+		FILENAME_PRE=self.series_name+"_"+STRCOMPRESS(self.wave, /REMOVE_ALL)+"A_"+self.date_obs+"." 
+		PRINT, "Filename : ",FILENAME_PRE
 	ENDIF ELSE IF n_elements(filename_value) NE 0 THEN BEGIN
 		FILENAME_PRE=filename_value
 	ENDIF
@@ -193,7 +197,7 @@ function sdodata::get_file, DECOMPRESS=decompress_value, FILENAME=filename_value
 		IF result NE 1 THEN BEGIN
 			 FILE_MKDIR, target_dir_value
 		ENDIF
-		IF STRMID(target_dir_value,1,1, /REVERSE_OFFSET) NE '/'  THEN FILENAME=TARGET_DIR+'/'+FILENAME ELSE FILENAME=TARGET_DIR+FILENAME
+		IF STRMID(target_dir_value,1,1, /REVERSE_OFFSET) NE '/'  THEN FILENAME_PRE=TARGET_DIR+'/'+FILENAME_PRE ELSE FILENAME_PRE=TARGET_DIR+FILENAME_PRE
 	ENDIF
 
 	url=''
