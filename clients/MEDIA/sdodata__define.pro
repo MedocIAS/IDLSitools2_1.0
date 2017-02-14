@@ -157,8 +157,7 @@ function sdodata::get_file, DECOMPRESS=decompress_value, FILENAME=filename_value
 	IF n_elements(target_dir_value) EQ 0 THEN TARGET_DIR='./' ELSE TARGET_DIR=target_dir_value
 
 	FILENAME_PRE=''
-	LIST_FILES=[]
-
+	LIST_FILES=LIST()
 ;	PRINT, "n elements 4 filename_value :", n_elements(filename_value)
 ;	PRINT, "series_name : ",self.series_name 
 
@@ -181,12 +180,36 @@ function sdodata::get_file, DECOMPRESS=decompress_value, FILENAME=filename_value
 	IF n_elements(segment_value) EQ 0 AND STRMID(self.series_name,0,8) EQ 'aia.lev1' THEN BEGIN
 		LIST_FILES=['image_lev1']
 	ENDIF ELSE IF n_elements(segment_value) EQ 0 AND STRMID(self.series_name,0,9) EQ 'hmi.sharp' THEN BEGIN 
-		LIST_FILES=['bitmap','Bp_err','Bp','Br_err','Br','Bt_err','Bt','conf_disambig','continuum', 'Dopplergram', 'magnetogram']
+;;		PRINT , "url : ",self.url 
+		url=(strsplit(self.url,"http://",/EXTRACT, /REGEX))[-1]
+		url+='/?media=json'
+;;		PRINT, "url json : ",url
+		oUrl=OBJ_NEW('IDLnetUrl')
+		oUrl.SetProperty, url_scheme='http'
+		oUrl.SetProperty, URL_HOST=url
+
+	  	json = oUrl.Get(/STRING_ARRAY)
+		json_result=JSON_PARSE(STRJOIN(json))
+		;;PRINT ,"json_result : ", JSON_SERIALIZE(json_result)
+		
+		IF (json_result.keys()).WHERE('items') NE !NULL THEN BEGIN 
+			data_result=json_result['items']
+			;;PRINT ,"data_result : ",JSON_SERIALIZE(data_result)
+		ENDIF	
+
+		FOREACH item , data_result DO BEGIN
+			name=(strsplit(item['name'],".fits",/EXTRACT, /REGEX))[-1]
+			LIST_FILES.Add, name
+		ENDFOREACH
+;;		PRINT , LIST_FILES
 	ENDIF ELSE IF n_elements(segment_value) EQ 0 AND STRMID(self.series_name,0,6) EQ 'hmi.ic' THEN BEGIN 
 		LIST_FILES=['continuum']
 	ENDIF ELSE IF n_elements(segment_value) EQ 0 AND STRMID(self.series_name,0,5) EQ 'hmi.m' THEN BEGIN
 		LIST_FILES=['magnetogram']
+	ENDIF ELSE IF n_elements(segment_value) NE 0 THEN BEGIN
+		LIST_FILES=segment_value
 	ENDIF
+
 
 	IF n_elements(quiet_value) EQ 0 THEN QUIET=0 ELSE QUIET=quiet_value
 
