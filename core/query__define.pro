@@ -88,6 +88,7 @@ end
 
 pro query__define
 	compile_opt idl2
+
 	void={query, fields_list :LIST(), name_list :LIST(), value_list : LIST(), operation : '', name_list_str:'', value_list_str :''}
  	return
 end
