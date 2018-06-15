@@ -1,11 +1,11 @@
 
 function  media_search, DATES=dates_value,WAVES=waves_list,SERIES=series_name_value,CADENCE=cadence_list,NB_RES_MAX=nbresmax_value
 	compile_opt idl2
-	
-	;#Define server 
+
+	;#Define server
 ;;	sitools2_url='idoc-solar-portal-test.ias.u-psud.fr'
-	sitools2_url='idoc-medoc-test.ias.u-psud.fr'
-;;	sitools2_url='medoc-sdo.ias.u-psud.fr'
+;;	sitools2_url='idoc-medoc-test.ias.u-psud.fr'
+	sitools2_url='medoc-sdo.ias.u-psud.fr'
 
 	IF n_elements(dates_value) EQ 0 THEN MESSAGE, "Provide dates please" ELSE DATES=dates_value
 	IF n_elements(waves_list) EQ 0 THEN WAVES=LIST('94','131','171','193','211','304','335','1600','1700') ELSE WAVES=waves_list
@@ -20,8 +20,8 @@ function  media_search, DATES=dates_value,WAVES=waves_list,SERIES=series_name_va
 	allowed_cadence_hmi=HASH('12 min', '12+min', '1 h', '1+h', '2 h', '2+h', '6 h','6+h','12 h', '12+h','1 day', '1+day')
 	allowed_cadence_hmi+=HASH('12m', '12+min', '1h','1+h','2h', '2+h','6h', '6+h', '12h', '12+h','1d', '1+day')
 	allowed_waves=LIST('94','131','171','193','211','304','335','1600','1700','6173')
-	
-;#Control entries 	
+
+;#Control entries
 	IF allowed_serie.WHERE(SERIES) EQ !NULL THEN MESSAGE, "Series should be in list : 'aia.lev1','hmi.sharp_720s','hmi.sharp_720s_nrt','hmi.m_720s','hmi.m_720s_nrt','hmi.sharp_cea_720s_nrt','hmi.ic_720s','hmi.ic_nolimbdark_720s_nrt'"
 	IF TYPENAME(DATES) NE 'LIST' THEN MESSAGE, "DATES should be a list"
 	IF TYPENAME(WAVES) EQ 'INT' THEN WAVES=LIST(STRCOMPRESS(WAVES, /REMOVE_ALL))
@@ -29,11 +29,11 @@ function  media_search, DATES=dates_value,WAVES=waves_list,SERIES=series_name_va
 	IF  STRMID(SERIES,0,3) EQ 'hmi' THEN WAVES=['6173']
 	IF TYPENAME(CADENCE) EQ 'STRING' THEN CADENCE=LIST(CADENCE)
 	WAVES_STRING=LIST()
-	IF TYPENAME(WAVES) EQ 'LIST' THEN BEGIN 
+	IF TYPENAME(WAVES) EQ 'LIST' THEN BEGIN
 		FOREACH wave, WAVES DO BEGIN
 			IF TYPENAME(wave) EQ 'INT' THEN BEGIN
 				WAVES_STRING.ADD, STRCOMPRESS(wave, /REMOVE_ALL),WAVES.WHERE(wave)
-			ENDIF ELSE BEGIN 
+			ENDIF ELSE BEGIN
 				WAVES_STRING.ADD,wave
 			ENDELSE
 		ENDFOREACH
@@ -44,7 +44,7 @@ function  media_search, DATES=dates_value,WAVES=waves_list,SERIES=series_name_va
 	ENDIF ELSE IF STRMID(SERIES,0,3) EQ 'hmi' AND (allowed_cadence_hmi.keys()).WHERE(CADENCE[0]) EQ !NULL THEN BEGIN
 		MESSAGE, "Cadence should be in list '12 min', '1 h', '2 h', '6 h', '12 h', '1 day' or you can use shortcuts as '12m', '1h', '2h', '6h','12h' or '1d'"
 	ENDIF
-	FOREACH wave,WAVES DO BEGIN 
+	FOREACH wave,WAVES DO BEGIN
 		IF allowed_waves.WHERE(wave) EQ !NULL THEN MESSAGE, "Waves not allowed, it should be in list '94','131','171','193','211','304','335','1600','1700'"
 	ENDFOREACH
 
@@ -55,16 +55,16 @@ function  media_search, DATES=dates_value,WAVES=waves_list,SERIES=series_name_va
 ;		PRINT, timestamp_string
 		result_value= STREGEX(timestamp_string,REGULAR_EXPR1,/SUBEXPR, /EXTRACT)
 		result= STREGEX(timestamp_string,REGULAR_EXPR1,/BOOLEAN)
-		IF result THEN BEGIN 
+		IF result THEN BEGIN
 			DATE_OPTIM.Add, result_value+".000"
-		ENDIF ELSE BEGIN 
+		ENDIF ELSE BEGIN
 			MESSAGE, "Format for DATES should be YYYY-MM-DDTHH:MM:SS"
 		ENDELSE
 	ENDFOREACH
 ;	FOREACH date, DATE_OPTIM DO PRINT , date
 
 
-;#Define Dataset uri 	
+;#Define Dataset uri
 	dataset_uri=''
 		IF STRMID(sitools2_url,0,9) EQ 'medoc-sdo' THEN BEGIN
 		dataset_uri='/webs_IAS_SDO_dataset'
@@ -103,13 +103,13 @@ function  media_search, DATES=dates_value,WAVES=waves_list,SERIES=series_name_va
 ;		PRINT, "Series param : ", serie_param
 	;	PRINT , "Cadence : " , CADENCE , "allowed_cadence_aia['1 min '] : ",allowed_cadence_aia['1 min']
 ;		cadence_param=LIST([fields_list[10]],allowed_cadence_aia[CADENCE[0]],'CADENCE')
-		IF STRMID(SERIES,0,3) EQ 'aia' THEN BEGIN 
+		IF STRMID(SERIES,0,3) EQ 'aia' THEN BEGIN
 			cadence_param=LIST([fields_struct['mask_cadence']],allowed_cadence_aia[CADENCE[0]],'CADENCE')
 		ENDIF ELSE IF STRMID(SERIES,0,3) EQ 'hmi' THEN BEGIN
 			cadence_param=LIST([fields_struct['mask_cadence']],allowed_cadence_hmi[CADENCE[0]],'CADENCE')
 		ENDIF
 ;		PRINT, "Cadence param : ", cadence_param
-		
+
 		query_list=LIST()
 
 		CATCH, Error_status
@@ -144,7 +144,7 @@ function  media_search, DATES=dates_value,WAVES=waves_list,SERIES=series_name_va
 ;			PRINT , "query 3 : ",query_list[2]
 ;			PRINT , "query 4 : ",query_list[3]
 ;			FOREACH query, query_list DO PRINT, "Query attributes : ",query->get_attributes()
-	
+
 			;;Ask columns : get, recnum, sunum, date__obs, wavelnth, ias_location,exptime,t_rec_index etc...
 			;;output_options=LIST(fields_list[0],fields_list[1],fields_list[2],fields_list[4],fields_list[5],fields_list[7],fields_list[8],fields_list[9])
 		ENDELSE
@@ -180,7 +180,7 @@ function  media_search, DATES=dates_value,WAVES=waves_list,SERIES=series_name_va
 ;;		sort_options=LIST(LIST(fields_list[5],'ASC'),LIST(fields_list[4],'ASC'))
 		sort_options=LIST(LIST(fields_struct['date__obs'],'ASC'),LIST(fields_struct['wavelnth'],'ASC'))
 ;		FOREACH sort_item, sort_options DO PRINT, "sort_options name : ",sort_item[0]->get_name()
-		
+
 		;; Error hanlder def
 		CATCH, Error_status
 	 	IF Error_status NE 0 THEN BEGIN
