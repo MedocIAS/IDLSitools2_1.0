@@ -1,8 +1,9 @@
 pro example_media
 	compile_opt idl2
 
-	sdo_list=media_search( DATES=LIST('2011-01-01T00:00','2011-01-06T00:05') , WAVES=LIST('304','193') , CADENCE=LIST('1 min'),  NB_RES_MAX=10)
-;; Print attributes	
+	sdo_list=media_search( DATES=LIST('2011-01-01T00:00:00','2011-01-06T00:05:00') , WAVES=LIST('304','193') , CADENCE=LIST('1 min'),  NB_RES_MAX=10)
+;; Print attributes
+	FOREACH sdo_data_item, sdo_list DO PRINT, sdo_data_item->get_attributes()
 	recnum_list=LIST()
 	FOREACH sdo_data_item, sdo_list DO recnum_list.add, sdo_data_item->get_recnum()
 	PRINT, N_ELEMENTS(recnum_list)
@@ -25,7 +26,7 @@ pro example_media
 		PRINT, JSON_SERIALIZE(meta)
 	ENDFOREACH
 ;;Filter on a specific keyword before download data using the get_file() method.
-	
+
 ;;	FOREACH sdo_item, sdo_list DO BEGIN
 ;;		meta_data_search=sdo_item->metadata_search(KEYWORDS=LIST('quality','cdelt1','cdelt2'))
 ;;		PRINT, JSON_SERIALIZE(meta_data_search)
