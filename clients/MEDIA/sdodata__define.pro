@@ -42,8 +42,8 @@ end
 
 function sdodata::get_attributes
 	compile_opt idl2
-	
-	IF STRMID(self.series_name,0,9) EQ 'hmi.sharp' THEN BEGIN 
+
+	IF STRMID(self.series_name,0,9) EQ 'hmi.sharp' THEN BEGIN
 		attributes={url : self.url,$
 			recnum : self.recnum,$
 			sunum :self.sunum,$
@@ -152,35 +152,42 @@ end
 
 function sdodata::get_file, DECOMPRESS=decompress_value, FILENAME=filename_value, SEGMENT=segment_value, TARGET_DIR=target_dir_value, QUIET=quiet_value
 	compile_opt idl2
-	
+
 	IF n_elements(decompress_value) EQ 0 THEN DECOMPRESS=0 ELSE DECOMPRESS=decompress_value
 	IF n_elements(target_dir_value) EQ 0 THEN TARGET_DIR='./' ELSE TARGET_DIR=target_dir_value
 
 	FILENAME_PRE=''
 	LIST_FILES=LIST()
 ;	PRINT, "n elements 4 filename_value :", n_elements(filename_value)
-;	PRINT, "series_name : ",self.series_name 
+;	PRINT, "series_name : ",self.series_name
 
-	;#Define prefix for output file 
-	IF n_elements(filename_value) EQ 0 AND STRMID(self.series_name,0,9) EQ 'hmi.sharp' THEN BEGIN 
+
+	;#Define prefix for output file
+	str_date_obs = self.date_obs
+	IF !VERSION.OS_FAMILY EQ 'Windows' THEN BEGIN
+		strput, str_date_obs, '.', 13
+   		strput, str_date_obs, '.', 16
+   	ENDIF
+
+	IF n_elements(filename_value) EQ 0 AND STRMID(self.series_name,0,9) EQ 'hmi.sharp' THEN BEGIN
 	;	PRINT ,"type series_name : ",TYPENAME(self.series_name)
 	;	PRINT ,"type wave : ",TYPENAME(self.wave)
-	;	PRINT ,"type date_obs : ",TYPENAME(self.date_obs)
+	;	PRINT ,"type date_obs : ",TYPENAME(self.date_obs),
 	;	PRINT, "type harpnum : ", TYPENAME(self.harpnum)
 		FILENAME_PRE=self.series_name+"_"+STRCOMPRESS(self.wave, /REMOVE_ALL)+"A_"+self.date_obs+"_"+STRCOMPRESS(self.harpnum, /REMOVE_ALL)+"."
-	ENDIF ELSE IF n_elements(filename_value) EQ 0 AND STRMID(self.series_name,0,3) EQ 'hmi' THEN BEGIN 
+	ENDIF ELSE IF n_elements(filename_value) EQ 0 AND STRMID(self.series_name,0,3) EQ 'hmi' THEN BEGIN
 		FILENAME_PRE=self.series_name+"_"+STRCOMPRESS(self.wave, /REMOVE_ALL)+"A_"+self.date_obs+"."
 	ENDIF ELSE IF n_elements(filename_value) EQ 0 AND self.series_name EQ 'aia.lev1' THEN BEGIN
-		FILENAME_PRE=self.series_name+"_"+STRCOMPRESS(self.wave, /REMOVE_ALL)+"A_"+self.date_obs+"." 
+		FILENAME_PRE=self.series_name+"_"+STRCOMPRESS(self.wave, /REMOVE_ALL)+"A_"+self.date_obs+"."
 	ENDIF ELSE IF n_elements(filename_value) NE 0 THEN BEGIN
 		FILENAME_PRE=filename_value
 	ENDIF
 
-	;#Define SEGMENT if that exists 
+	;#Define SEGMENT if that exists
 	IF n_elements(segment_value) EQ 0 AND STRMID(self.series_name,0,8) EQ 'aia.lev1' THEN BEGIN
 		LIST_FILES=['image_lev1']
-	ENDIF ELSE IF n_elements(segment_value) EQ 0 AND STRMID(self.series_name,0,9) EQ 'hmi.sharp' THEN BEGIN 
-;;		PRINT , "url : ",self.url 
+	ENDIF ELSE IF n_elements(segment_value) EQ 0 AND STRMID(self.series_name,0,9) EQ 'hmi.sharp' THEN BEGIN
+;;		PRINT , "url : ",self.url
 		url=(strsplit(self.url,"http://",/EXTRACT, /REGEX))[-1]
 		url+='/?media=json'
 ;;		PRINT, "url json : ",url
@@ -191,18 +198,18 @@ function sdodata::get_file, DECOMPRESS=decompress_value, FILENAME=filename_value
 	  	json = oUrl.Get(/STRING_ARRAY)
 		json_result=JSON_PARSE(STRJOIN(json))
 		;;PRINT ,"json_result : ", JSON_SERIALIZE(json_result)
-		
-		IF (json_result.keys()).WHERE('items') NE !NULL THEN BEGIN 
+
+		IF (json_result.keys()).WHERE('items') NE !NULL THEN BEGIN
 			data_result=json_result['items']
 			;;PRINT ,"data_result : ",JSON_SERIALIZE(data_result)
-		ENDIF	
+		ENDIF
 
 		FOREACH item , data_result DO BEGIN
 			name=(strsplit(item['name'],".fits",/EXTRACT, /REGEX))[-1]
 			LIST_FILES.Add, name
 		ENDFOREACH
 ;;		PRINT , LIST_FILES
-	ENDIF ELSE IF n_elements(segment_value) EQ 0 AND STRMID(self.series_name,0,6) EQ 'hmi.ic' THEN BEGIN 
+	ENDIF ELSE IF n_elements(segment_value) EQ 0 AND STRMID(self.series_name,0,6) EQ 'hmi.ic' THEN BEGIN
 		LIST_FILES=['continuum']
 	ENDIF ELSE IF n_elements(segment_value) EQ 0 AND STRMID(self.series_name,0,5) EQ 'hmi.m' THEN BEGIN
 		LIST_FILES=['magnetogram']
@@ -214,7 +221,7 @@ function sdodata::get_file, DECOMPRESS=decompress_value, FILENAME=filename_value
 	IF n_elements(quiet_value) EQ 0 THEN QUIET=0 ELSE QUIET=quiet_value
 
 	;#Create directory if it does not exist yet
-	IF n_elements(target_dir_value) NE 0 THEN BEGIN 
+	IF n_elements(target_dir_value) NE 0 THEN BEGIN
 		result=FILE_TEST(target_dir_value,/DIRECTORY)
 		IF result NE 1 THEN BEGIN
 			 FILE_MKDIR, target_dir_value
@@ -226,33 +233,37 @@ function sdodata::get_file, DECOMPRESS=decompress_value, FILENAME=filename_value
 	self.url=(strsplit(self.url,"http://",/EXTRACT, /REGEX))[-1]
 	IF NOT DECOMPRESS AND STRMID(self.series_name,0,8) EQ 'aia.lev1' THEN self.url+=";compress=rice"
 
-	;#Define filename 
-	FOREACH file_suff, LIST_FILES DO BEGIN 
+	;#Define filename
+	FOREACH file_suff, LIST_FILES DO BEGIN
 		FILENAME=FILENAME_PRE+file_suff+".fits"
 		IF STRMID(self.series_name,0,3) EQ 'hmi' THEN BEGIN
 			url=self.url+"/"+file_suff+".fits"
-		ENDIF ELSE IF self.series_name EQ "aia.lev1" THEN BEGIN 
+		ENDIF ELSE IF self.series_name EQ "aia.lev1" THEN BEGIN
 			url=self.url
 		ENDIF
-;;		PRINT , FILENAME
+
+		IF !VERSION.OS EQ 'Win32' THEN BEGIN
+			FILENAME=FILENAME.Replace(":",".")
+		ENDIF
+;;		PRINT, FILENAME
 ;;		PRINT, url
 
-		;#Retrieve data 	
+		;#Retrieve data
 		oUrl_get=OBJ_NEW('IDLnetUrl')
 		oUrl_get.SetProperty, url_scheme='http'
 		oUrl_get.SetProperty, URL_HOST=url
 		file=oUrl_get.Get(FILENAME=FILENAME)
-		IF NOT QUIET AND self.ias_location NE '' THEN BEGIN 
-			PRINT,"Downloading " +FILENAME+"..." 
-		ENDIF ELSE IF self.ias_location EQ '' THEN BEGIN 
+		IF NOT QUIET AND self.ias_location NE '' THEN BEGIN
+			PRINT,"Downloading " +FILENAME+"..."
+		ENDIF ELSE IF self.ias_location EQ '' THEN BEGIN
 			PRINT,"No data at IAS for recnum : "+ STRTRIM(self.recnum)
 		ENDIF
-		OBJ_DESTROY, oUrl_get 
+		OBJ_DESTROY, oUrl_get
 ;		OBJ_DESTROY, file
 	ENDFOREACH
-	return, 0
-end 
 
+	return, 0
+end
 
 
 function sdodata::metadata_search, KEYWORDS=keywords_list, RECNUM_LIST=recnum_list
@@ -260,7 +271,7 @@ function sdodata::metadata_search, KEYWORDS=keywords_list, RECNUM_LIST=recnum_li
 
 	IF n_elements(keywords_list) EQ 0 THEN message," Error metadata_search(): keywords must be specified" ELSE KEYWORDS=keywords_list
 	IF n_elements(recnum_list) EQ 0 THEN  RECNUM_LIST=LIST( STRCOMPRESS(self.recnum, /REMOVE_ALL) ) ELSE RECNUM_LIST=recnum_list
-	
+
 	server_adress='idoc-solar-portal-test.u-psud.fr'
 	;server_adress='medoc-sdo.u-psud.fr'
 	ds_sdo_dataset=obj_new('dataset', server_adress+'/webs_'+self.series_name+'_dataset')
@@ -271,13 +282,13 @@ function sdodata::metadata_search, KEYWORDS=keywords_list, RECNUM_LIST=recnum_li
 	Q_aia=obj_new('query',param_query)
 	O1_aia=LIST()
 	FOREACH key, KEYWORDS DO BEGIN
-		IF (ds_sdo_dataset.fields_struct).HasKey(key) THEN O1_aia.Add,(ds_sdo_dataset.fields_struct)[key] ELSE message,"Error metadata_search(): keyword does not exist" 
+		IF (ds_sdo_dataset.fields_struct).HasKey(key) THEN O1_aia.Add,(ds_sdo_dataset.fields_struct)[key] ELSE message,"Error metadata_search(): keyword does not exist"
 	ENDFOREACH
 
 	S1_aia=LIST(LIST(fields_list[18],'ASC'));;sort by date_obs ascendant
 
 	results=ds_sdo_dataset->search(LIST(Q_aia),O1_aia,S1_aia)
-	OBJ_DESTROY, ds_sdo_dataset, Q_aia 
+	OBJ_DESTROY, ds_sdo_dataset, Q_aia
 	IF n_elements(results) EQ 1 THEN return, results[0] ELSE return , results
 
 end
